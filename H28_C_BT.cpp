@@ -73,6 +73,14 @@ class C_BT : protected C_UART_base
 	void Rce_on()	{	CTS_LOW;	}
 		
 	E_LOGIC Ret_rse_flag()	{	return CHECK_BIT_TF(UCSRA,RXC);	}
+		
+	friend void operator<< (C_BT &, const char *);
+	friend void operator<< (char* ,C_BT &);
+	friend void operator<< (const char* ,C_BT &);
+	
+	friend void operator>> (const char * ,C_BT &);
+	friend void operator>> (C_BT &, char *);
+	friend void operator>> (C_BT &, const char *);
 };
 
 inline C_BT::C_BT(E_UART_ADDR _arg_bt_uart_addr, E_IO_PORT_ADDR _arg_bt_port_rts, E_IO_NUM _arg_bt_bit_rts, E_IO_PORT_ADDR _arg_bt_port_cts, E_IO_NUM _arg_bt_bit_cts)
@@ -142,6 +150,36 @@ void C_BT::In(const char *_arg_bt_str)
 		In(_in_data);
 	}
 	while (strcmp(_arg_bt_str,_in_data) != 0);
+}
+
+void operator<<(C_BT &_arg_bt, const char *_arg_out_data)
+{
+	_arg_bt.Out(_arg_out_data);
+}
+
+void operator<<(char *_arg_in_data ,C_BT &_arg_bt)
+{
+	_arg_bt.In(_arg_in_data);
+}
+
+void operator<<(const char *_arg_str_comp ,C_BT &_arg_bt)
+{
+	_arg_bt.In(_arg_str_comp);
+}
+
+void operator>>(const char *_arg_out_data ,C_BT &_arg_bt)
+{
+	_arg_bt.Out(_arg_out_data);
+}
+
+void operator>>(C_BT &_arg_bt, char *_arg_in_data)
+{
+	_arg_bt.In(_arg_in_data);
+}
+
+void operator>>(C_BT &_arg_bt, const char *_arg_str_comp)
+{
+	_arg_bt.In(_arg_str_comp);
 }
 
 #endif
