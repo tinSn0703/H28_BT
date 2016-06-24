@@ -5,7 +5,10 @@
 #include <string.h>
 #include <H28_AVR/H28_AVR.h>
 
-inline usint strcmp(const char *_arg_str_f, char *_arg_str)
+#define LED4_ON  PORTC |=  (1 << 7)
+#define LED4_OFF PORTC &= ~(1 << 7)
+
+inline usint F_str_cmp(const char *_arg_str_f, char *_arg_str)
 {
 	for (usint i = 0; _arg_str_f[i] != '\0'; i++)
 	{
@@ -53,6 +56,7 @@ class C_BT : protected C_UART_base
 	
 	#define PIN_RTS  _SFR_IO8(Ret_port_rts() + 0)
 	#define DDR_CTS  _SFR_IO8(Ret_port_cts() + 1)
+	#define DDR_RTS	 _SFR_IO8(Ret_port_rts() + 1)
 	#define PORT_CTS _SFR_IO8(Ret_port_cts() + 2)
 	
 	#define RTS_CHECK (PIN_RTS & (1 << Ret_bit_rts()))
@@ -67,7 +71,7 @@ class C_BT : protected C_UART_base
 	void Out(const char[]);
 	
 	void In(char []);
-	void In(const char*);
+	void In_comp(const char*);
 	
 	void Rce_off()	{	CTS_HIGH;	}
 	void Rce_on()	{	CTS_LOW;	}
@@ -75,12 +79,8 @@ class C_BT : protected C_UART_base
 	E_LOGIC Ret_rse_flag()	{	return CHECK_BIT_TF(UCSRA,RXC);	}
 		
 	friend void operator<< (C_BT &, const char *);
-	friend void operator<< (char* ,C_BT &);
-	friend void operator<< (const char* ,C_BT &);
-	
-	friend void operator>> (const char * ,C_BT &);
 	friend void operator>> (C_BT &, char *);
-	friend void operator>> (C_BT &, const char *);
+	friend void operator== (C_BT &, const char *);
 };
 
 inline C_BT::C_BT(E_UART_ADDR _arg_bt_uart_addr, E_IO_PORT_ADDR _arg_bt_port_rts, E_IO_NUM _arg_bt_bit_rts, E_IO_PORT_ADDR _arg_bt_port_cts, E_IO_NUM _arg_bt_bit_cts)
@@ -101,7 +101,9 @@ inline C_BT::C_BT(E_UART_ADDR _arg_bt_uart_addr, E_IO_PORT_ADDR _arg_bt_port_rts
 	UCSRB = ((1<<RXEN) | (1<<TXEN));
 	UCSRC = ((1<<UCSZ0) | (1<<UCSZ1));
 
-	DDR_CTS  |= (1 << _arg_bt_bit_cts);
+	DDR_CTS  |=  (1 << _arg_bt_bit_cts);
+	DDR_RTS  &= ~(1 << _arg_bt_bit_rts);
+	
 	PORT_CTS |= (1 << _arg_bt_bit_cts);
 }
 
@@ -111,7 +113,7 @@ void C_BT::Out(const char _arg_bt_out_data[])
 	
 	while (_arg_bt_out_data[i] != '\0')
 	{
-		while (RTS_CHECK);
+		while (RTS_CHECK != 0);
 		
 		while (!(UCSRA & (1<<UDRE)));
 		UDR = _arg_bt_out_data[i];
@@ -120,9 +122,11 @@ void C_BT::Out(const char _arg_bt_out_data[])
 	}
 }
 
-void C_BT::In(char _arg_bt_in_data[])
+inline void C_BT::In(char _arg_bt_in_data[])
 {	
 	usint i = 0;
+	
+	LED4_ON;
 	
 	while (1)
 	{
@@ -138,10 +142,12 @@ void C_BT::In(char _arg_bt_in_data[])
 		i++;
 	}
 	
+	LED4_OFF;
+	
 	_arg_bt_in_data[i + 1] = '\0';
 }
 
-void C_BT::In(const char *_arg_bt_str)
+inline void C_BT::In_comp(const char *_arg_bt_str)
 {
 	char _in_data[40] = {};
 	
@@ -149,7 +155,7 @@ void C_BT::In(const char *_arg_bt_str)
 	{		
 		In(_in_data);
 	}
-	while (strcmp(_arg_bt_str,_in_data) != 0);
+	while (F_str_cmp(_arg_bt_str,_in_data) != 0);
 }
 
 void operator<<(C_BT &_arg_bt, const char *_arg_out_data)
@@ -157,29 +163,14 @@ void operator<<(C_BT &_arg_bt, const char *_arg_out_data)
 	_arg_bt.Out(_arg_out_data);
 }
 
-void operator<<(char *_arg_in_data ,C_BT &_arg_bt)
+void operator>>(C_BT &_arg_bt, char _arg_in_data[])
 {
 	_arg_bt.In(_arg_in_data);
 }
 
-void operator<<(const char *_arg_str_comp ,C_BT &_arg_bt)
+void operator==(C_BT &_arg_bt, const char *_arg_str_comp)
 {
-	_arg_bt.In(_arg_str_comp);
-}
-
-void operator>>(const char *_arg_out_data ,C_BT &_arg_bt)
-{
-	_arg_bt.Out(_arg_out_data);
-}
-
-void operator>>(C_BT &_arg_bt, char *_arg_in_data)
-{
-	_arg_bt.In(_arg_in_data);
-}
-
-void operator>>(C_BT &_arg_bt, const char *_arg_str_comp)
-{
-	_arg_bt.In(_arg_str_comp);
+	_arg_bt.In_comp(_arg_str_comp);
 }
 
 #endif
