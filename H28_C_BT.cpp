@@ -119,6 +119,10 @@ inline void C_BT::In(char _arg_bt_in_data[])
 	}
 	
 	_arg_bt_in_data[i + 1] = '\0';
+	
+	#ifdef _BT_TX_
+	Lcd_put_str(0x40,_arg_bt_in_data);
+	#endif
 }
 
 void C_BT::In_comp(const char _arg_str_comp[])
