@@ -84,10 +84,12 @@ void C_ROBOBA::CONNECT_MASTER()
 		CONNECTED [13 + i] = _mem_str_addr[i];
 	}
 	
+	#ifdef _AKILCD_H_
 	Lcd_put_str(0x00,CONNECTING);
 	_delay_ms(1000);
 	Lcd_put_str(0x40,&CONNECTING[16]);
 	_delay_ms(1000);
+	#endif
 	
 	re_connect:
 	
@@ -107,7 +109,9 @@ void C_ROBOBA::CONNECT_MASTER()
 	
 	_mem_bt >> "\r\n+SSP?\r\n";
 	
+	#ifdef _AKILCD_H_
 	Lcd_put_str(0x40,"connecting   ");
+	#endif
 	
 	_mem_bt << "AT+RESSSP=1\r\n";
 	
@@ -117,7 +121,9 @@ void C_ROBOBA::CONNECT_MASTER()
 	
 	_mem_bt >> "\r\nOK\r\n";
 	
+	#ifdef _AKILCD_H_
 	Lcd_put_str(0x40,"connected    ");
+	#endif
 }
 
 void C_ROBOBA::CONNECT_SLAVE()
