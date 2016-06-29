@@ -120,7 +120,7 @@ inline void C_BT::In(char _arg_bt_in_data[])
 	
 	_arg_bt_in_data[i + 1] = '\0';
 	
-	#ifdef _BT_TX_
+	#ifdef _AKILCD_H_
 	Lcd_clr_dis();
 	Lcd_put_str(0x00,_arg_bt_in_data);
 	Lcd_put_str(0x40,&_arg_bt_in_data[16]);
