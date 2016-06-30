@@ -5,9 +5,6 @@
 #include <string.h>
 #include <H28_AVR/H28_AVR.h>
 
-#define LED4_ON  PORTC |=  (1 << 7)
-#define LED4_OFF PORTC &= ~(1 << 7)
-
 inline usint strcmp(const char *_arg_str_f, char *_arg_str)
 {
 	for (usint i = 0; _arg_str_f[i] != '\0'; i++)
@@ -120,11 +117,11 @@ inline void C_BT::In(char _arg_bt_in_data[])
 	
 	_arg_bt_in_data[i + 1] = '\0';
 	
-	#ifdef _AKILCD_H_
-	Lcd_clr_dis();
-	Lcd_put_str(0x00,_arg_bt_in_data);
-	Lcd_put_str(0x40,&_arg_bt_in_data[16]);
-	#endif
+// 	#ifdef _AKILCD_H_
+// 	Lcd_clr_dis();
+// 	Lcd_put_str(0x00,_arg_bt_in_data);
+// 	Lcd_put_str(0x40,&_arg_bt_in_data[16]);
+// 	#endif
 }
 
 void C_BT::In_comp(const char _arg_str_comp[])
