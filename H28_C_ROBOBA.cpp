@@ -5,20 +5,19 @@
 class C_ROBOBA
 {
 	private:
+	E_UART_MODE _mem_bt_mode :1;
+	E_LOGIC _mem_nf_link :1;
 	char _mem_str_addr[12];
-	
 	C_BT _mem_bt;
 	
 	public:
 	C_ROBOBA()	{}
-	C_ROBOBA(E_UART_ADDR ,E_IO_PORT_ADDR, E_IO_NUM, E_IO_PORT_ADDR, E_IO_NUM );
+	C_ROBOBA(E_UART_MODE ,E_UART_ADDR ,E_IO_PORT_ADDR, E_IO_NUM, E_IO_PORT_ADDR, E_IO_NUM );
 	
-	void SET_ADDR(char []);
+	E_LOGIC Ret_link()	{	return _mem_nf_link;	}
 	
+	void SET_ADDR(const char []);
 	void GET_ADDR(char []);
-	
-	//	void INQUIRY_MASTER();
-	//	void INQUIRY_SLAVE ();
 	
 	void CONNECT_MASTER(const char []);
 	void CONNECT_SLAVE (const char []);
@@ -35,13 +34,17 @@ class C_ROBOBA
 	friend void operator>> (C_ROBOBA &,const char[]);
 };
 
-C_ROBOBA::C_ROBOBA(E_UART_ADDR _arg_uart_addr,E_IO_PORT_ADDR _arg_rts_addr, E_IO_NUM _arg_rts_bit, E_IO_PORT_ADDR _arg_cts_addr, E_IO_NUM _arg_cts_bit)
+C_ROBOBA::C_ROBOBA(E_UART_MODE _arg_bt_mode,E_UART_ADDR _arg_uart_addr,E_IO_PORT_ADDR _arg_rts_addr, E_IO_NUM _arg_rts_bit, E_IO_PORT_ADDR _arg_cts_addr, E_IO_NUM _arg_cts_bit)
 : _mem_bt(_arg_uart_addr,_arg_rts_addr,_arg_rts_bit,_arg_cts_addr,_arg_cts_bit)
 {
+	_mem_bt_mode = _arg_bt_mode;
+	
+	_mem_nf_link = FALES;
+	
 	_mem_bt >> "\r\nOK\r\n";
 }
 
-void C_ROBOBA::SET_ADDR(char _arg_str_addr[])
+inline void C_ROBOBA::SET_ADDR(const char _arg_str_addr[])
 {
 	for (usint i = 0; i < 12; i++)
 	{
@@ -73,6 +76,8 @@ void C_ROBOBA::GET_ADDR(char _arg_str_addr[])
 
 void C_ROBOBA::CONNECT_MASTER()
 {
+	if (_mem_bt_mode != EU_TRA)	return (void)NULL;
+	
 	char CONMASTER[]  = "AT+CONMASTER=1,000190123456\r\n";
 	char CONNECTED[]  = "\r\n+CONNECTED=000190123456\r\n";
 	
@@ -82,10 +87,6 @@ void C_ROBOBA::CONNECT_MASTER()
 		CONNECTED [13 + i] = _mem_str_addr[i];
 	}
 	
-	#ifdef _AKILCD_H_
-	Lcd_put_str(0x40,"connecting   ");
-	#endif
-	
 	_mem_bt << CONMASTER;
 	
 	_mem_bt >> "\r\nACK\r\n";
@@ -94,13 +95,13 @@ void C_ROBOBA::CONNECT_MASTER()
 	
 	_mem_bt >> "\r\nOK\r\n";
 	
-	#ifdef _AKILCD_H_
-	Lcd_put_str(0x40,"connected    ");
-	#endif
+	_mem_nf_link = TRUE;
 }
 
 void C_ROBOBA::CONNECT_SLAVE()
 {
+	if (_mem_bt_mode != EU_REC)	return (void)NULL;
+	
 	char CONNECTING[] = "\r\n+CONNECTING=123456789abc\r\n";
 	char CONNECTED[]  = "\r\n+CONNECTED=123456789abc\r\n";
 	
@@ -124,25 +125,19 @@ void C_ROBOBA::CONNECT_SLAVE()
 	
 	_mem_bt >> "\r\nOK\r\n";
 	
-	
+	_mem_nf_link = TRUE;
 }
 
-void C_ROBOBA::CONNECT_MASTER(const char _arg_str_addr[])
+inline void C_ROBOBA::CONNECT_MASTER(const char _arg_str_addr[])
 {
-	for (usint i = 0; i < 12; i++)
-	{
-		_mem_str_addr[i] = _arg_str_addr[i];
-	}
+	SET_ADDR(_arg_str_addr);
 	
 	CONNECT_MASTER();
 }
 
-void C_ROBOBA::CONNECT_SLAVE(const char _arg_str_addr[])
+inline void C_ROBOBA::CONNECT_SLAVE(const char _arg_str_addr[])
 {
-	for (usint i = 0; i < 12; i++)
-	{
-		_mem_str_addr[i] = _arg_str_addr[i];
-	}
+	SET_ADDR(_arg_str_addr);
 	
 	CONNECT_SLAVE();
 }
@@ -153,6 +148,11 @@ void operator<< (C_ROBOBA &_arg_bt, const char _arg_out_data[])
 }
 
 void operator>> (C_ROBOBA &_arg_bt, char _arg_in_data[])
+{
+	_arg_bt._mem_bt >> _arg_in_data;
+}
+
+void operator>> (C_ROBOBA &_arg_bt, const char _arg_in_data[])
 {
 	_arg_bt._mem_bt >> _arg_in_data;
 }

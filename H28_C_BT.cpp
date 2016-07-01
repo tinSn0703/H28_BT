@@ -61,14 +61,14 @@ class C_BT : protected C_UART_base
 	#define CTS_HIGH	(PORT_CTS |=  (1 << Ret_bit_cts()))
 	#define CTS_LOW		(PORT_CTS &= ~(1 << Ret_bit_cts()))
 	
-	void Out(const char[]);
-	void In(char []);
-	
-	void In_comp(const char []);
-	
 	public:
 	C_BT()	{}
 	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
+	
+	void Out(const char[]);
+	void In(char []);
+	void In(const char []);
+	void In_comp(const char []);
 	
 	void Rce_off()	{	CTS_HIGH;	}
 	void Rce_on()	{	CTS_LOW;	}
@@ -122,6 +122,17 @@ inline void C_BT::In(char _arg_bt_in_data[])
 // 	Lcd_put_str(0x00,_arg_bt_in_data);
 // 	Lcd_put_str(0x40,&_arg_bt_in_data[16]);
 // 	#endif
+}
+
+void C_BT::In(const char _arg_str_comp[])
+{
+	char _in_data[40] = {};
+	
+	do
+	{
+		In(_in_data);
+	}
+	while (strcmp(_arg_str_comp,_in_data) != 0);
 }
 
 void C_BT::In_comp(const char _arg_str_comp[])
