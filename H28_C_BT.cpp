@@ -2,38 +2,7 @@
 #ifndef _H28_C_BT_CPP_
 #define _H28_C_BT_CPP_ 1
 
-#include <string.h>
-#include <H28_AVR/H28_AVR.h>
-
-inline usint strcmp(const char *_arg_str_f, char *_arg_str)
-{
-	for (usint i = 0; _arg_str_f[i] != '\0'; i++)
-	{
-		if (_arg_str_f[i] != _arg_str[i])
-		{
-			return 1;
-		}
-	}
-	
-	return 0;
-}
-
-inline usint strcmp(const char *_arg_str_0, const char *_arg_str_1, usint _arg_num)
-{
-	for (usint i = 0; i < _arg_num; i++)
-	{
-		if (_arg_str_0[i] == '\0')
-		{
-			break;
-		}
-		else if (_arg_str_0[i] != _arg_str_1[i])
-		{
-			return 1;
-		}
-	}
-	
-	return 0;
-}
+#include "H28_BT.h"
 
 class C_BT : protected C_UART_base
 {
@@ -52,8 +21,10 @@ class C_BT : protected C_UART_base
 	E_IO_NUM Ret_bit_rts()	{	return _mem_bt_bit_rts;	}
 	
 	#define PIN_RTS  _SFR_IO8(Ret_port_rts() + 0)
-	#define DDR_CTS  _SFR_IO8(Ret_port_cts() + 1)
+	#define PIN_CTS  _SFR_IO8(Ret_port_cts() + 0)
 	#define DDR_RTS	 _SFR_IO8(Ret_port_rts() + 1)
+	#define DDR_CTS  _SFR_IO8(Ret_port_cts() + 1)
+	#define PORT_RTS _SFR_IO8(Ret_port_rts() + 2)
 	#define PORT_CTS _SFR_IO8(Ret_port_cts() + 2)
 	
 	#define RTS_CHECK (PIN_RTS & (1 << Ret_bit_rts()))
@@ -61,14 +32,13 @@ class C_BT : protected C_UART_base
 	#define CTS_HIGH	(PORT_CTS |=  (1 << Ret_bit_cts()))
 	#define CTS_LOW		(PORT_CTS &= ~(1 << Ret_bit_cts()))
 	
+	void Out(const char[]);
+	void In(char []);
+	void In_comp(const char []);
+	
 	public:
 	C_BT()	{}
 	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
-	
-	void Out(const char[]);
-	void In(char []);
-	void In(const char []);
-	void In_comp(const char []);
 	
 	void Rce_off()	{	CTS_HIGH;	}
 	void Rce_on()	{	CTS_LOW;	}
@@ -77,7 +47,6 @@ class C_BT : protected C_UART_base
 		
 	friend void operator<< (C_BT &, const char []);
 	friend void operator>> (C_BT &, char []);
-	friend void operator>> (C_BT &, const char []);
 	
 	friend void operator== (C_BT &, const char []);
 };
@@ -116,23 +85,6 @@ inline void C_BT::In(char _arg_bt_in_data[])
 	}
 	
 	_arg_bt_in_data[i + 1] = '\0';
-	
-// 	#ifdef _AKILCD_H_
-// 	Lcd_clr_dis();
-// 	Lcd_put_str(0x00,_arg_bt_in_data);
-// 	Lcd_put_str(0x40,&_arg_bt_in_data[16]);
-// 	#endif
-}
-
-void C_BT::In(const char _arg_str_comp[])
-{
-	char _in_data[40] = {};
-	
-	do
-	{
-		In(_in_data);
-	}
-	while (strcmp(_arg_str_comp,_in_data) != 0);
 }
 
 void C_BT::In_comp(const char _arg_str_comp[])
@@ -180,16 +132,9 @@ void operator>> (C_BT &_arg_bt, char _arg_in_data[])
 	_arg_bt.In(_arg_in_data);
 }
 
-void operator>> (C_BT &_arg_bt, const char _arg_str_comp[])
-{
-	_arg_bt.In_comp(_arg_str_comp);
-}
-
 void operator== (C_BT &_arg_bt, const char _arg_str_comp[])
 {
 	_arg_bt.In_comp(_arg_str_comp);
 }
-
-#include "H28_C_ROBOBA.cpp"
 
 #endif
