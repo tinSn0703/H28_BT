@@ -17,6 +17,8 @@ class C_ROBOBA_SLAVE : public C_ROBOBA
 	E_LOGIC In(char []);
 	
 	//void Re_Connect();
+	
+	friend E_LOGIC operator>>(C_ROBOBA_SLAVE &,char []);
 };
 
 C_ROBOBA_SLAVE::C_ROBOBA_SLAVE(E_UART_ADDR _arg_uart_addr,E_IO_PORT_ADDR _arg_rts_addr, E_IO_NUM _arg_rts_bit, E_IO_PORT_ADDR _arg_cts_addr, E_IO_NUM _arg_cts_bit)
@@ -72,7 +74,7 @@ E_LOGIC C_ROBOBA_SLAVE::In(char _arg_in_data[])
 	{
 		_arg_in_data[i] = 0x00;
 		
-		if(_in_data[i * 2] <= 0x39)
+		if (_in_data[i * 2] <= 0x39)
 		{
 			_arg_in_data[i] |= ((_in_data[i * 2] & 0x0f) << 4);
 		}
@@ -80,7 +82,8 @@ E_LOGIC C_ROBOBA_SLAVE::In(char _arg_in_data[])
 		{
 			_arg_in_data[i] |= (((_in_data[i * 2] & 0x0f) + 9) << 4);
 		}
-		if(_in_data[i * 2 + 1] <= 0x39)
+		
+		if (_in_data[i * 2 + 1] <= 0x39)
 		{
 			_arg_in_data[i] |= (_in_data[i * 2 + 1] & 0x0f);
 		}
@@ -91,6 +94,11 @@ E_LOGIC C_ROBOBA_SLAVE::In(char _arg_in_data[])
 	}
 	
 	return TRUE;
+}
+
+E_LOGIC operator>>(C_ROBOBA_SLAVE &_arg_bt_slave,char _arg_in_data[])
+{
+	return _arg_bt_slave.In(_arg_in_data);
 }
 
 #endif
