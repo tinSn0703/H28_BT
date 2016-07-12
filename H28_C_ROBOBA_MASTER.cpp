@@ -16,13 +16,18 @@ class C_ROBOBA_MASTER : public C_ROBOBA
 	
 	void Out(const char[]);
 	
-//	void Re_Connect();
+	void Re_Connect();
 
-	friend void operator<<(C_ROBOBA_MASTER &, const char []);
+	E_LOGIC Flag();
+
+	friend void operator<< (C_ROBOBA_MASTER &, const char []);
+	
+	friend bool operator== (C_ROBOBA_MASTER &,E_LOGIC );
+	friend bool operator!= (C_ROBOBA_MASTER &,E_LOGIC );
 };
 
-C_ROBOBA_MASTER::C_ROBOBA_MASTER(E_UART_ADDR _arg_uart_addr,E_IO_PORT_ADDR _arg_rts_addr, E_IO_NUM _arg_rts_bit, E_IO_PORT_ADDR _arg_cts_addr, E_IO_NUM _arg_cts_bit)
-: C_ROBOBA(_arg_uart_addr,_arg_rts_addr,_arg_rts_bit,_arg_cts_addr,_arg_cts_bit)
+C_ROBOBA_MASTER::C_ROBOBA_MASTER(E_UART_ADDR _arg_bt_uart_addr,E_IO_PORT_ADDR _arg_bt_rts_addr, E_IO_NUM _arg_bt_rts_bit, E_IO_PORT_ADDR _arg_bt_cts_addr, E_IO_NUM _arg_bt_cts_bit)
+: C_ROBOBA(_arg_bt_uart_addr,_arg_bt_rts_addr,_arg_bt_rts_bit,_arg_bt_cts_addr,_arg_bt_cts_bit)
 {}
 
 void C_ROBOBA_MASTER::Connect()
@@ -40,7 +45,7 @@ void C_ROBOBA_MASTER::Connect()
 	
 	_mem_bt << CONMASTER;
 	
-	_mem_bt == "\r\nACK\r\n";
+	_mem_bt >> "\r\nACK\r\n";
 	
 	char _in_data[40] = {};
 		
@@ -52,48 +57,59 @@ void C_ROBOBA_MASTER::Connect()
 		
 	} while (strcmp(CONNECTED,_in_data) != 0);
 	
-	_mem_bt == "\r\nOK\r\n";
+	_mem_bt >> "\r\nOK\r\n";
 }
 
-inline void C_ROBOBA_MASTER::Connect(const char _arg_str_addr[])
+inline void C_ROBOBA_MASTER::Connect(const char _arg_bt_addr[])
 {
-	Set_bt_addr(_arg_str_addr);
+	Set_bt_addr(_arg_bt_addr);
 	
 	Connect();
 }
 
-void C_ROBOBA_MASTER::Out(const char _arg_out_data[])
+void C_ROBOBA_MASTER::Re_Connect()
+{	
+	_mem_bt << "AT+RESET\r\n";
+	
+	_mem_bt >> "\r\nACK\r\n";
+	
+	_mem_bt >> "\r\nOK\r\n";
+	
+	Connect();
+}
+
+void C_ROBOBA_MASTER::Out(const char _arg_bt_out_data[])
 {
 	char _out_data[20] = {};
 	
 	for (usint i = 0; i < BT_DATA_NUM; i++)
 	{
-		if (((_arg_out_data[i]) & 0xf0) < 0xa0)
+		if (((_arg_bt_out_data[i]) & 0xf0) < 0xa0)
 		{
 			_out_data[i * 2 + 0]  = 0x30;
 			
-			_out_data[i * 2 + 0] += ((_arg_out_data[i] & 0xf0) >> 4);
+			_out_data[i * 2 + 0] += ((_arg_bt_out_data[i] & 0xf0) >> 4);
 		}
 		else
 		{
 			_out_data[i * 2 + 0]  = 0x40;
 			
-			_out_data[i * 2 + 0] += ((_arg_out_data[i] & 0xf0) >> 4);
+			_out_data[i * 2 + 0] += ((_arg_bt_out_data[i] & 0xf0) >> 4);
 			
 			_out_data[i * 2 + 0] -= 9;
 		}
 		
-		if (((_arg_out_data[i]) & 0x0f) < 0x0a)
+		if (((_arg_bt_out_data[i]) & 0x0f) < 0x0a)
 		{
 			_out_data[i * 2 + 1]  = 0x30;
 			
-			_out_data[i * 2 + 1] += (_arg_out_data[i] & 0x0f);
+			_out_data[i * 2 + 1] += (_arg_bt_out_data[i] & 0x0f);
 		}
 		else
 		{
 			_out_data[i * 2 + 1]  = 0x40;
 			
-			_out_data[i * 2 + 1] += (_arg_out_data[i] & 0x0f);
+			_out_data[i * 2 + 1] += (_arg_bt_out_data[i] & 0x0f);
 			
 			_out_data[i * 2 + 1] -= 9;
 		}
@@ -106,9 +122,22 @@ void C_ROBOBA_MASTER::Out(const char _arg_out_data[])
 	_mem_bt << _out_data;
 }
 
-void operator<<(C_ROBOBA_MASTER &_arg_bt_master, const char _arg_out_data[])
+void operator<< (C_ROBOBA_MASTER &_arg_bt_master, const char _arg_bt_out_data[])
 {
-	_arg_bt_master.Out(_arg_out_data);
+	_arg_bt_master.Out(_arg_bt_out_data);
 }
 
+bool operator== (C_ROBOBA_MASTER &_arg_bt_master, E_LOGIC _arg_bt_flag_rse)
+{
+	if (_arg_bt_master._mem_bt == _arg_bt_flag_rse)	return true;
+	
+	return false;
+}
+
+bool operator!= (C_ROBOBA_MASTER &_arg_bt_master, E_LOGIC _arg_bt_flag_rse)
+{
+	if (_arg_bt_master._mem_bt != _arg_bt_flag_rse)	return true;
+	
+	return false;
+}
 #endif

@@ -32,10 +32,6 @@ class C_BT : protected C_UART_base
 	#define CTS_HIGH	(PORT_CTS |=  (1 << Ret_bit_cts()))
 	#define CTS_LOW		(PORT_CTS &= ~(1 << Ret_bit_cts()))
 	
-	void Out(const char[]);
-	void In(char []);
-	void In_comp(const char []);
-	
 	public:
 	C_BT()	{}
 	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
@@ -44,11 +40,17 @@ class C_BT : protected C_UART_base
 	void Rce_on()	{	CTS_LOW;	}
 		
 	E_LOGIC Ret_rse_flag()	{	return CHECK_BIT_TF(UCSRA,RXC);	}
-		
+	
+	void Out(const char[]);
+	void In(char []);
+	void In_comp(const char []);
+	
 	friend void operator<< (C_BT &, const char []);
 	friend void operator>> (C_BT &, char []);
+	friend void operator>> (C_BT &, const char []);
 	
-	friend void operator== (C_BT &, const char []);
+	friend bool operator== (C_BT &, E_LOGIC );
+	friend bool operator!= (C_BT &, E_LOGIC );
 };
 
 inline void C_BT::Out(const char _arg_bt_out_data[])
@@ -132,9 +134,22 @@ void operator>> (C_BT &_arg_bt, char _arg_in_data[])
 	_arg_bt.In(_arg_in_data);
 }
 
-void operator== (C_BT &_arg_bt, const char _arg_str_comp[])
+void operator>> (C_BT &_arg_bt, const char _arg_str_comp[])
 {
 	_arg_bt.In_comp(_arg_str_comp);
 }
 
+bool operator== (C_BT &_arg_bt, E_LOGIC _arg_bt_flag_rse)
+{
+	if (_arg_bt.Ret_rse_flag() == _arg_bt_flag_rse)	return true;
+	
+	return false;
+}
+
+bool operator!= (C_BT &_arg_bt, E_LOGIC _arg_bt_flag_rse)
+{
+	if (_arg_bt.Ret_rse_flag() != _arg_bt_flag_rse)	return true;
+	
+	return false;
+}
 #endif

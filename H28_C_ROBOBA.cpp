@@ -22,7 +22,7 @@ class C_ROBOBA
 C_ROBOBA::C_ROBOBA(E_UART_ADDR _arg_uart_addr,E_IO_PORT_ADDR _arg_rts_addr, E_IO_NUM _arg_rts_bit, E_IO_PORT_ADDR _arg_cts_addr, E_IO_NUM _arg_cts_bit)
 : _mem_bt(_arg_uart_addr,_arg_rts_addr,_arg_rts_bit,_arg_cts_addr,_arg_cts_bit)
 {
-	_mem_bt == "\r\nOK\r\n";
+	_mem_bt >> "\r\nOK\r\n";
 }
 
 inline void C_ROBOBA::Set_bt_addr(const char _arg_str_addr[])
@@ -45,7 +45,7 @@ inline void C_ROBOBA::Get_bt_addr(char _arg_str_addr[])
 		
 	} while (strcmp("\r\nBDADDR=",_in_data));
 	
-	_mem_bt == "\r\nOK\r\n";
+	_mem_bt >> "\r\nOK\r\n";
 	
 	for (uint i = 0; i < BT_ADDR_BYTE; i++)
 	{
