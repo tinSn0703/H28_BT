@@ -89,11 +89,11 @@ void C_ROBOBA_SLAVE::Re_Connect()
 
 E_LOGIC C_ROBOBA_SLAVE::In(char _arg_bt_in_data[])
 {
-	char _in_data[25] = {};
-	
-	_mem_bt >> _in_data;
+	char _in_data[30] = {}; //ここ30にしとかないとダメ 減らすな
 
-	if ((strcmp("\r\n+DISCONNECTED=",_in_data) | strcmp("\r\n+LINK_LOST=",_in_data)) == 0)
+	_mem_bt >> _in_data;
+	
+	if ((strcmp("\r\n+LINK_LOST=000",_in_data) & strcmp("\r\n+DISCONNECTED=000",_in_data)) == 0)
 	{
 		_mem_bt_falg = FALES;
 		
@@ -104,7 +104,7 @@ E_LOGIC C_ROBOBA_SLAVE::In(char _arg_bt_in_data[])
 	{
 		_arg_bt_in_data[i] = 0x00;
 		
-		if (_in_data[i * 2] <= 0x39)
+		if (_in_data[i * 2 + 0] <= 0x39)
 		{
 			_arg_bt_in_data[i] |= ((_in_data[i * 2] & 0x0f) << 4);
 		}

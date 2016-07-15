@@ -68,7 +68,7 @@ inline void C_ROBOBA_MASTER::Connect(const char _arg_bt_addr[])
 }
 
 void C_ROBOBA_MASTER::Re_Connect()
-{	
+{
 	_mem_bt << "AT+RESET\r\n";
 	
 	_mem_bt >> "\r\nACK\r\n";
