@@ -166,7 +166,7 @@ inline C_BT::C_BT(E_UART_ADDR _arg_bt_uart_addr, E_IO_PORT_ADDR _arg_bt_port_rts
 	
 	PORT_CTS |= (1 << _arg_bt_bit_cts);
 	
-	_mem_bt_flag = TRUE;
+	_mem_bt_flag = FALES;
 }
 
 inline void C_BT::Out(const char _arg_bt_out_data[])
@@ -198,6 +198,7 @@ inline void C_BT::In(char _arg_bt_in_data[])
 		
 		if (_flag != EU_SUCCE)
 		{
+			CTS_HIGH;
 			break;
 		}
 		
