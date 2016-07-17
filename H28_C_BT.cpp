@@ -10,41 +10,52 @@ class C_BT : protected C_UART_base , public C_TIMER_inside
 	private:
 	E_IO_PORT_ADDR _mem_bt_port_cts :8;
 	E_IO_PORT_ADDR _mem_bt_port_rts :8;
+	E_IO_PORT_ADDR _mem_bt_port_rse :8;
 	
-	E_IO_NUM _mem_bt_bit_cts :8;
-	E_IO_NUM _mem_bt_bit_rts :8;
+	E_IO_NUM _mem_bt_bit_cts :3;
+	E_IO_NUM _mem_bt_bit_rts :3;
+	E_IO_NUM _mem_bt_bit_rse :3;
 	
 	E_LOGIC _mem_bt_flag :1;
 	
 	protected:
 	E_IO_PORT_ADDR Ret_port_cts()	{	return _mem_bt_port_cts;	}
 	E_IO_PORT_ADDR Ret_port_rts()	{	return _mem_bt_port_rts;	}
+	E_IO_PORT_ADDR Ret_port_rse()	{	return _mem_bt_port_rse;	}
 	
 	E_IO_NUM Ret_bit_cts()	{	return _mem_bt_bit_cts;	}
 	E_IO_NUM Ret_bit_rts()	{	return _mem_bt_bit_rts;	}
+	E_IO_NUM Ret_bit_rse()	{	return _mem_bt_bit_rse;	}
 	
 	#define PIN_RTS  _SFR_IO8(Ret_port_rts() + 0)
 	#define PIN_CTS  _SFR_IO8(Ret_port_cts() + 0)
+	#define PIN_RSE  _SFR_IO8(Ret_port_rse() + 0)
 	#define DDR_RTS	 _SFR_IO8(Ret_port_rts() + 1)
 	#define DDR_CTS  _SFR_IO8(Ret_port_cts() + 1)
+	#define DDR_RSE  _SFR_IO8(Ret_port_rse() + 1)
 	#define PORT_RTS _SFR_IO8(Ret_port_rts() + 2)
 	#define PORT_CTS _SFR_IO8(Ret_port_cts() + 2)
+	#define PORT_RSE _SFR_IO8(Ret_port_rse() + 2)
 	
 	#define RTS_CHECK (CHECK_TURN_BIT_TF(PIN_RTS,Ret_bit_rts()))
 	
 	#define CTS_HIGH	(PORT_CTS |=  (1 << Ret_bit_cts()))
 	#define CTS_LOW		(PORT_CTS &= ~(1 << Ret_bit_cts()))
 	
-	E_UART_FLAG Check();
+	#define RSE_HIGH	(PORT_RSE |=  (1 << Ret_bit_rse()))
+	#define RSE_LOW		(PORT_RSE &= ~(1 << Ret_bit_rse()))
+	
 	E_UART_FLAG Check_in();
 	E_UART_FLAG Check_out();
 	
 	public:
 	C_BT()	{}
-	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
+	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
 	
 	void Rce_off()	{	CTS_HIGH;	}
 	void Rce_on()	{	CTS_LOW;	}
+	
+	void Reset();
 	
 	void Out(const char[]);
 	void In(char []);
@@ -59,35 +70,6 @@ class C_BT : protected C_UART_base , public C_TIMER_inside
 };
 
 //protected
-E_UART_FLAG C_BT::Check()
-{
-	C_TIMER_inside::Start();
-	
-	while (1)
-	{
-		if ((CHECK_BIT_TF(UCSRA,RXC) | RTS_CHECK) == TRUE)
-		{
-			if (C_TIMER_inside::Ret_flag())
-			{
-				C_TIMER_inside::End();
-				
-				_mem_bt_flag = TRUE;
-				
-				return EU_SUCCE;
-			}
-		}
-		
-		if (C_TIMER_inside::Check() == TRUE)	//カウント完了(タイムアウト)
-		{
-			_mem_bt_flag = FALES;
-			
-			return EU_ERROR;
-		}
-	}
-	
-	return EU_NONE;
-}
-
 E_UART_FLAG C_BT::Check_in()
 {
 	C_TIMER_inside::Start();
@@ -141,7 +123,16 @@ E_UART_FLAG C_BT::Check_out()
 }
 
 //public
-inline C_BT::C_BT(E_UART_ADDR _arg_bt_uart_addr, E_IO_PORT_ADDR _arg_bt_port_rts, E_IO_NUM _arg_bt_bit_rts, E_IO_PORT_ADDR _arg_bt_port_cts, E_IO_NUM _arg_bt_bit_cts)
+inline C_BT::C_BT
+(	
+	E_UART_ADDR _arg_bt_uart_addr, 
+	E_IO_PORT_ADDR _arg_bt_port_rts,
+	E_IO_NUM _arg_bt_bit_rts, 
+	E_IO_PORT_ADDR _arg_bt_port_cts, 
+	E_IO_NUM _arg_bt_bit_cts,
+	E_IO_PORT_ADDR _arg_bt_port_rse,
+	E_IO_NUM _arg_bt_bit_rse
+)
 {
 	C_TIMER_inside::Set(80);
 	
@@ -149,9 +140,11 @@ inline C_BT::C_BT(E_UART_ADDR _arg_bt_uart_addr, E_IO_PORT_ADDR _arg_bt_port_rts
 	
 	_mem_bt_port_cts = _arg_bt_port_cts;
 	_mem_bt_port_rts = _arg_bt_port_rts;
+	_mem_bt_port_rse = _arg_bt_port_rse;
 	
 	_mem_bt_bit_cts = _arg_bt_bit_cts;
 	_mem_bt_bit_rts = _arg_bt_bit_rts;
+	_mem_bt_bit_rse = _arg_bt_bit_rse;
 	
 	//115.2kbps double-on parity-off
 	//rec,tra-mode 8bit interrupt-off
@@ -161,10 +154,12 @@ inline C_BT::C_BT(E_UART_ADDR _arg_bt_uart_addr, E_IO_PORT_ADDR _arg_bt_port_rts
 	UCSRB = ((1<<RXEN) | (1<<TXEN));
 	UCSRC = ((1<<UCSZ0) | (1<<UCSZ1));
 
-	DDR_CTS  |=  (1 << _arg_bt_bit_cts);
-	DDR_RTS  &= ~(1 << _arg_bt_bit_rts);
+	DDR_CTS |=  (1 << _arg_bt_bit_cts);
+	DDR_RSE |=  (1 << _mem_bt_bit_rse);
+	DDR_RTS &= ~(1 << _arg_bt_bit_rts);
 	
 	PORT_CTS |= (1 << _arg_bt_bit_cts);
+	PORT_RSE |= (1 << _mem_bt_bit_rse);
 	
 	_mem_bt_flag = FALES;
 }
@@ -173,7 +168,7 @@ inline void C_BT::Out(const char _arg_bt_out_data[])
 {	
 	for (usint i = 0; _arg_bt_out_data[i] != '\0'; i++)
 	{
-		E_UART_FLAG _flag = Check();
+		E_UART_FLAG _flag = Check_out();
 		
 		if (_flag != EU_SUCCE)
 		{
@@ -194,7 +189,7 @@ inline void C_BT::In(char _arg_bt_in_data[])
 	{
 		CTS_LOW;
 		
-		E_UART_FLAG _flag = Check();
+		E_UART_FLAG _flag = Check_in();
 		
 		if (_flag != EU_SUCCE)
 		{
@@ -225,6 +220,15 @@ void C_BT::In_comp(const char _arg_str_comp[])
 		In(_in_data);
 	}
 	while (strcmp(_arg_str_comp,_in_data) != 0);
+}
+
+void C_BT::Reset()
+{	
+	RSE_LOW;
+	_delay_ms(50);
+
+	RSE_HIGH;
+	_delay_ms(50);
 }
 
 void operator<< (C_BT &_arg_bt, const char _arg_out_data[])

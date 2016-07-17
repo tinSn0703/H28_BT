@@ -2,16 +2,16 @@
 #ifndef _H28_C_ROBOBA_SLAVE_CPP_
 #define _H28_C_ROBOBA_SLAVE_CPP_ 1
 
-#include "H28_C_ROBOBA.cpp"
+#include "H28_C_BT_304.cpp"
 
-class C_ROBOBA_SLAVE : public C_ROBOBA
+class C_BT_304_SLAVE : public C_BT_304
 {
 	protected:
 	E_LOGIC _mem_bt_falg :1; 
 	
 	public:
-	C_ROBOBA_SLAVE()	{}
-	C_ROBOBA_SLAVE(E_UART_ADDR ,E_IO_PORT_ADDR, E_IO_NUM, E_IO_PORT_ADDR, E_IO_NUM );
+	C_BT_304_SLAVE()	{}
+	C_BT_304_SLAVE(E_UART_ADDR ,E_IO_PORT_ADDR, E_IO_NUM, E_IO_PORT_ADDR, E_IO_NUM ,E_IO_PORT_ADDR, E_IO_NUM);
 	
 	void Connect();
 	
@@ -23,19 +23,37 @@ class C_ROBOBA_SLAVE : public C_ROBOBA
 	
 	E_LOGIC Ret_flag();
 	
-	friend void operator>>(C_ROBOBA_SLAVE &,char []);
+	friend void operator>>(C_BT_304_SLAVE &,char []);
 	
-	friend bool operator==(C_ROBOBA_SLAVE &,E_LOGIC );
-	friend bool operator!=(C_ROBOBA_SLAVE &,E_LOGIC );
+	friend bool operator==(C_BT_304_SLAVE &,E_LOGIC );
+	friend bool operator!=(C_BT_304_SLAVE &,E_LOGIC );
 };
 
-C_ROBOBA_SLAVE::C_ROBOBA_SLAVE(E_UART_ADDR _arg_bt_uart_addr,E_IO_PORT_ADDR _arg_bt_rts_addr, E_IO_NUM _arg_bt_rts_bit, E_IO_PORT_ADDR _arg_bt_cts_addr, E_IO_NUM _arg_bt_cts_bit)
-: C_ROBOBA(_arg_bt_uart_addr,_arg_bt_rts_addr,_arg_bt_rts_bit,_arg_bt_cts_addr,_arg_bt_cts_bit)
+C_BT_304_SLAVE::C_BT_304_SLAVE
+(
+	E_UART_ADDR _arg_bt_uart_addr,
+	E_IO_PORT_ADDR _arg_bt_rts_addr,
+	E_IO_NUM _arg_bt_rts_bit,
+	E_IO_PORT_ADDR _arg_bt_cts_addr,
+	E_IO_NUM _arg_bt_cts_bit,
+	E_IO_PORT_ADDR _arg_bt_rse_addr,
+	E_IO_NUM _arg_bt_rse_bit
+)
+: C_BT_304
+(
+	_arg_bt_uart_addr,
+	_arg_bt_rts_addr,
+	_arg_bt_rts_bit,
+	_arg_bt_cts_addr,
+	_arg_bt_cts_bit,
+	_arg_bt_rse_addr,
+	_arg_bt_rse_bit
+)
 {
 	_mem_bt_falg = FALES;
 }
 
-E_LOGIC C_ROBOBA_SLAVE::Ret_flag()
+E_LOGIC C_BT_304_SLAVE::Ret_flag()
 /*
 接続時 TRUE
 それ以外　FALES
@@ -44,7 +62,7 @@ E_LOGIC C_ROBOBA_SLAVE::Ret_flag()
 	return _mem_bt_falg;
 }
 
-void C_ROBOBA_SLAVE::Connect()
+void C_BT_304_SLAVE::Connect()
 {
 	char CONNECTING[] = "\r\n+CONNECTING=123456789abc\r\n";
 	char CONNECTED[]  = "\r\n+CONNECTED=123456789abc\r\n";
@@ -80,14 +98,14 @@ void C_ROBOBA_SLAVE::Connect()
 	_mem_bt >> "\r\nOK\r\n";
 }
 
-inline void C_ROBOBA_SLAVE::Connect(const char _arg_bt_addr[])
+inline void C_BT_304_SLAVE::Connect(const char _arg_bt_addr[])
 {
 	Set_bt_addr(_arg_bt_addr);
 	
 	Connect();
 }
 
-void C_ROBOBA_SLAVE::Re_Connect()
+void C_BT_304_SLAVE::Re_Connect()
 {
 	_mem_bt << "AT+RESET\r\n";
 	
@@ -98,7 +116,7 @@ void C_ROBOBA_SLAVE::Re_Connect()
 	Connect();
 }
 
-void C_ROBOBA_SLAVE::In(char _arg_bt_in_data[])
+void C_BT_304_SLAVE::In(char _arg_bt_in_data[])
 {
 	char _in_data[30] = {}; //ここ30にしとかないとダメ 減らすな
 
@@ -135,12 +153,17 @@ void C_ROBOBA_SLAVE::In(char _arg_bt_in_data[])
 	_mem_bt_falg = TRUE;
 }
 
-void operator>>(C_ROBOBA_SLAVE &_arg_bt_slave,char _arg_bt_in_data[])
+void operator>>(C_BT_304_SLAVE &_arg_bt_slave,char _arg_bt_in_data[])
 {
 	_arg_bt_slave.In(_arg_bt_in_data);
 }
 
-bool operator==(C_ROBOBA_SLAVE &_arg_bt_slave,E_LOGIC _arg_bt_com_flag)
+bool operator==(C_BT_304_SLAVE &_arg_bt_slave,E_LOGIC _arg_bt_com_flag)
+/*
+通信が動作しているかどうかの確認
+	TRUE  -> 動作
+	FALES -> 切断
+*/
 {
 	if (_arg_bt_slave._mem_bt == _arg_bt_com_flag)		return true;
 	
@@ -149,7 +172,12 @@ bool operator==(C_ROBOBA_SLAVE &_arg_bt_slave,E_LOGIC _arg_bt_com_flag)
 	return false;
 }
 
-bool operator!=(C_ROBOBA_SLAVE &_arg_bt_slave,E_LOGIC _arg_bt_com_flag)
+bool operator!=(C_BT_304_SLAVE &_arg_bt_slave,E_LOGIC _arg_bt_com_flag)
+/*
+通信が動作しているかどうかの確認
+	TRUE  -> 動作
+	FALES -> 切断
+*/
 {
 	if (_arg_bt_slave._mem_bt != _arg_bt_com_flag)		return true;
 	

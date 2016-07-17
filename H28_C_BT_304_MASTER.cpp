@@ -8,7 +8,7 @@ class C_BT_304_MASTER : public C_BT_304
 {
 	public:
 	C_BT_304_MASTER()	{}
-	C_BT_304_MASTER(E_UART_ADDR ,E_IO_PORT_ADDR, E_IO_NUM, E_IO_PORT_ADDR, E_IO_NUM );
+	C_BT_304_MASTER(E_UART_ADDR ,E_IO_PORT_ADDR, E_IO_NUM, E_IO_PORT_ADDR, E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM);
 	
 	void Connect(const char []);
 	
@@ -26,8 +26,26 @@ class C_BT_304_MASTER : public C_BT_304
 	friend bool operator!= (C_BT_304_MASTER &,E_LOGIC );
 };
 
-C_BT_304_MASTER::C_BT_304_MASTER(E_UART_ADDR _arg_bt_uart_addr,E_IO_PORT_ADDR _arg_bt_rts_addr, E_IO_NUM _arg_bt_rts_bit, E_IO_PORT_ADDR _arg_bt_cts_addr, E_IO_NUM _arg_bt_cts_bit)
-: C_BT_304(_arg_bt_uart_addr,_arg_bt_rts_addr,_arg_bt_rts_bit,_arg_bt_cts_addr,_arg_bt_cts_bit)
+C_BT_304_MASTER::C_BT_304_MASTER
+(
+	E_UART_ADDR _arg_bt_uart_addr,
+	E_IO_PORT_ADDR _arg_bt_rts_addr, 
+	E_IO_NUM _arg_bt_rts_bit, 
+	E_IO_PORT_ADDR _arg_bt_cts_addr, 
+	E_IO_NUM _arg_bt_cts_bit,
+	E_IO_PORT_ADDR _arg_bt_rse_addr,
+	E_IO_NUM _arg_bt_rse_bit
+)
+: C_BT_304
+(
+	_arg_bt_uart_addr,
+	_arg_bt_rts_addr,
+	_arg_bt_rts_bit,
+	_arg_bt_cts_addr,
+	_arg_bt_cts_bit,
+	_arg_bt_rse_addr,
+	_arg_bt_rse_bit
+)
 {}
 
 void C_BT_304_MASTER::Connect()
@@ -69,37 +87,13 @@ inline void C_BT_304_MASTER::Connect(const char _arg_bt_addr[])
 
 void C_BT_304_MASTER::Re_Connect()
 {
-// 	_delay_ms(1200);
-// 	
-// 	_mem_bt << "+++";
-// 	
-// 	_delay_ms(1200);
-// 	
-// 	char _in_data[40] = {};
-// 		
-// 	do 
-// 	{
-// 		_mem_bt >> _in_data;
-// 		
-// 		Lcd_put_str(0x40,_in_data);
-// 	} 
-// 	while (strcmp("\r\n+LINK_LOST",_in_data));
-	
-	_mem_bt.Reset();
-	
-// 	char _bt_addr[12] = {};
-// 	
-// 	Get_bt_addr(_bt_addr);
-// 	
-// 	Lcd_put_str(0x40,_bt_addr);
+	_mem_bt >> "\r\n+LINK_LOST=";
 		
 	_mem_bt << "AT+RESET\r\n";
 	
 	_mem_bt >> "\r\nACK\r\n";
 	
 	_mem_bt >> "\r\nOK\r\n";
-	
-	Lcd_put_str(0x40,"LINK_LOST    ");
 	
 	Connect();
 }
