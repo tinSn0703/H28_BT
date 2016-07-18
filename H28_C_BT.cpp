@@ -78,7 +78,7 @@ inline C_BT::C_BT
 	E_IO_NUM _arg_bt_bit_rse
 )
 {
-	C_TIMER_inside::Set(1000);
+	C_TIMER_inside::Set(100);
 	
 	C_UART_base::Set_uart_base_addr(_arg_bt_uart_addr);
 	
