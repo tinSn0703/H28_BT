@@ -45,9 +45,6 @@ class C_BT : protected C_UART_base , public C_TIMER_inside
 	#define RSE_HIGH	(PORT_RSE |=  (1 << Ret_bit_rse()))
 	#define RSE_LOW		(PORT_RSE &= ~(1 << Ret_bit_rse()))
 	
-	E_UART_FLAG Check_in();
-	E_UART_FLAG Check_out();
-	
 	public:
 	C_BT()	{}
 	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
@@ -69,59 +66,6 @@ class C_BT : protected C_UART_base , public C_TIMER_inside
 	friend bool operator!= (C_BT &, E_LOGIC );
 };
 
-//protected
-E_UART_FLAG C_BT::Check_in()
-{
-	C_TIMER_inside::Start();
-	
-	while (1)
-	{
-		if ((C_TIMER_inside::Ret_flag() & CHECK_BIT_TF(UCSRA,RXC)) == TRUE)	//受信完了
-		{
-			C_TIMER_inside::End();
-			
-			_mem_bt_flag = TRUE;
-			
-			return EU_SUCCE;
-		}
-		
-		if (C_TIMER_inside::Check() == TRUE)	//カウント完了(タイムアウト)
-		{
-			_mem_bt_flag = FALES;
-			
-			return EU_ERROR;
-		}
-	}
-	
-	return EU_NONE;
-}
-
-E_UART_FLAG C_BT::Check_out()
-{
-	C_TIMER_inside::Start();
-	
-	while (1)
-	{
-		if ((C_TIMER_inside::Ret_flag() & RTS_CHECK) == TRUE)	//受信完了
-		{
-			C_TIMER_inside::End();
-			
-			_mem_bt_flag = TRUE;
-			
-			return EU_SUCCE;
-		}
-		
-		if (C_TIMER_inside::Check() == TRUE)	//カウント完了(タイムアウト)
-		{
-			_mem_bt_flag = FALES;
-			
-			return EU_ERROR;
-		}
-	}
-	
-	return EU_NONE;
-}
-
 //public
 inline C_BT::C_BT
 (	
@@ -134,7 +78,7 @@ inline C_BT::C_BT
 	E_IO_NUM _arg_bt_bit_rse
 )
 {
-	C_TIMER_inside::Set(80);
+	C_TIMER_inside::Set(1000);
 	
 	C_UART_base::Set_uart_base_addr(_arg_bt_uart_addr);
 	
@@ -168,12 +112,32 @@ inline void C_BT::Out(const char _arg_bt_out_data[])
 {	
 	for (usint i = 0; _arg_bt_out_data[i] != '\0'; i++)
 	{
-		E_UART_FLAG _flag = Check_out();
+		C_TIMER_inside::Start();
 		
-		if (_flag != EU_SUCCE)
+		while (1)
 		{
-			break;
+			if ((C_TIMER_inside::Ret_flag() & RTS_CHECK) == TRUE)
+			{
+				C_TIMER_inside::End();
+				
+				_mem_bt_flag = TRUE;
+				
+				PORTB &= ~(1 << PB4);
+				
+				goto Go_succe;
+			}
+			
+			if (C_TIMER_inside::Check())	//カウント完了(タイムアウト)
+			{				
+				_mem_bt_flag = FALES;
+				
+				PORTB |= (1 << PB4);
+				
+				return (void)0;
+			}
 		}
+		
+		Go_succe:
 		
 		while (!(UCSRA & (1<<UDRE)));
 		
@@ -182,20 +146,41 @@ inline void C_BT::Out(const char _arg_bt_out_data[])
 }
 
 inline void C_BT::In(char _arg_bt_in_data[])
-{
+{	
 	usint i = 0;
 	
 	while (1)
 	{
 		CTS_LOW;
 		
-		E_UART_FLAG _flag = Check_in();
+		C_TIMER_inside::Start();
 		
-		if (_flag != EU_SUCCE)
+		while (1)
 		{
-			CTS_HIGH;
-			break;
+			if ((C_TIMER_inside::Ret_flag() & CHECK_BIT_TF(UCSRA,RXC)) == TRUE)	//受信完了
+			{
+				C_TIMER_inside::End();
+				
+				_mem_bt_flag = TRUE;
+				
+				PORTB &= ~(1 << PB4);
+				
+				goto GO_succe;
+			}
+			
+			if (C_TIMER_inside::Check())	//カウント完了(タイムアウト)
+			{				
+				PORTB |= (1 << PB4);
+				
+				CTS_HIGH;
+				
+				_mem_bt_flag = FALES;
+				
+				return (void)0;
+			}
 		}
+		
+		GO_succe:
 		
 		_arg_bt_in_data[i] = UDR;
 		
@@ -204,6 +189,7 @@ inline void C_BT::In(char _arg_bt_in_data[])
 		if ((_arg_bt_in_data[i] == '\n') && (i > 1))
 		{
 			_arg_bt_in_data[i + 1] = '\0';
+			
 			break;
 		}
 		
@@ -225,10 +211,10 @@ void C_BT::In_comp(const char _arg_str_comp[])
 void C_BT::Reset()
 {	
 	RSE_LOW;
-	_delay_ms(50);
+	_delay_ms(15);
 
 	RSE_HIGH;
-	_delay_ms(50);
+	_delay_ms(15);
 }
 
 void operator<< (C_BT &_arg_bt, const char _arg_out_data[])

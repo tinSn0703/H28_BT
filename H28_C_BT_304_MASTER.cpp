@@ -86,12 +86,8 @@ inline void C_BT_304_MASTER::Connect(const char _arg_bt_addr[])
 }
 
 void C_BT_304_MASTER::Re_Connect()
-{
+{	
 	_mem_bt.Reset();
-		
-	_mem_bt << "AT+RESET\r\n";
-	
-	_mem_bt >> "\r\nACK\r\n";
 	
 	_mem_bt >> "\r\nOK\r\n";
 	

@@ -7,7 +7,8 @@
 class C_BT_304_SLAVE : public C_BT_304
 {
 	protected:
-	E_LOGIC _mem_bt_falg :1; 
+	T_NUM _mem_bt_slave_flag_count;
+	E_LOGIC _mem_bt_slave_falg :1;
 	
 	public:
 	C_BT_304_SLAVE()	{}
@@ -50,7 +51,8 @@ C_BT_304_SLAVE::C_BT_304_SLAVE
 	_arg_bt_rse_bit
 )
 {
-	_mem_bt_falg = FALES;
+	_mem_bt_slave_flag_count = 0;
+	_mem_bt_slave_falg = FALES;
 }
 
 E_LOGIC C_BT_304_SLAVE::Ret_flag()
@@ -59,7 +61,7 @@ E_LOGIC C_BT_304_SLAVE::Ret_flag()
 それ以外　FALES
 */
 {
-	return _mem_bt_falg;
+	return _mem_bt_slave_falg;
 }
 
 void C_BT_304_SLAVE::Connect()
@@ -106,12 +108,8 @@ inline void C_BT_304_SLAVE::Connect(const char _arg_bt_addr[])
 }
 
 void C_BT_304_SLAVE::Re_Connect()
-{
+{	
 	_mem_bt.Reset();
-	
-	_mem_bt << "AT+RESET\r\n";
-	
-	_mem_bt >> "\r\nACK\r\n";
 	
 	_mem_bt >> "\r\nOK\r\n";
 	
@@ -122,14 +120,21 @@ void C_BT_304_SLAVE::In(char _arg_bt_in_data[])
 {
 	char _in_data[30] = {}; //ここ30にしとかないとダメ 減らすな
 
+	_mem_bt_slave_falg = FALES;
+
 	_mem_bt >> _in_data;
 	
-	if ((strcmp("\r\n+LINK_LOST=000",_in_data) & strcmp("\r\n+DISCONNECTED=000",_in_data)) == 0)
-	{
-		_mem_bt_falg = FALES;
+	if (_mem_bt == FALES)	_mem_bt_slave_flag_count += 1;
+	else					_mem_bt_slave_flag_count  = 0;
+	
+	if (((strcmp("\r\n+LINK_LOST=000",_in_data) & strcmp("\r\n+DISCONNECTED=000",_in_data)) == 0) || (_mem_bt_slave_flag_count > 500))
+	{		
+		_mem_bt_slave_flag_count = 0;
 		
 		return (void)0;
 	}
+	
+	_mem_bt_slave_falg = TRUE;
 	
 	for (usint i = 0; i < BT_DATA_NUM; i++)
 	{
@@ -151,8 +156,6 @@ void C_BT_304_SLAVE::In(char _arg_bt_in_data[])
 			_arg_bt_in_data[i] |= ((_in_data[i * 2 + 1] & 0x0f) + 9);
 		}
 	}
-	
-	_mem_bt_falg = TRUE;
 }
 
 void operator>>(C_BT_304_SLAVE &_arg_bt_slave,char _arg_bt_in_data[])
@@ -169,7 +172,7 @@ bool operator==(C_BT_304_SLAVE &_arg_bt_slave,E_LOGIC _arg_bt_com_flag)
 {
 	if (_arg_bt_slave._mem_bt == _arg_bt_com_flag)		return true;
 	
-	if (_arg_bt_slave._mem_bt_falg == _arg_bt_com_flag)	return true;
+	if (_arg_bt_slave._mem_bt_slave_falg == _arg_bt_com_flag)	return true;
 	
 	return false;
 }
@@ -183,7 +186,7 @@ bool operator!=(C_BT_304_SLAVE &_arg_bt_slave,E_LOGIC _arg_bt_com_flag)
 {
 	if (_arg_bt_slave._mem_bt != _arg_bt_com_flag)		return true;
 	
-	if (_arg_bt_slave._mem_bt_falg != _arg_bt_com_flag)	return true;
+	if (_arg_bt_slave._mem_bt_slave_falg != _arg_bt_com_flag)	return true;
 	
 	return false;
 }
