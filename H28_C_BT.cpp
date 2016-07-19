@@ -258,7 +258,9 @@ In_comp
 	const char _arg_bt_str_comp[]
 )
 /*
+_arg_bt_str_compと一致するまで受信し続ける。
 
+	_arg_bt_str_comp : 比較する文字列。
 */
 {
 	char _in_data[40] = {};
@@ -280,7 +282,10 @@ In_comp
 	const char _arg_bt_str_comp[]
 )
 /*
+_arg_bt_str_compと一致するまで受信し続け、一致したデータを返す。
 
+	_arg_re_bt_in_data : ここにデータが格納される
+	_arg_bt_str_comp : 比較する文字列
 */
 {
 	do
@@ -297,7 +302,7 @@ C_BT::
 Reset
 ()
 /*
-
+Bluetoothを再起動する
 */
 {	
 	RSE_LOW;
@@ -316,7 +321,7 @@ operator <<
 	const char _arg_bt_out_data[]
 )
 /*
-
+C_BT::Out()の演算子ver
 */
 {
 	_arg_bt.Out(_arg_bt_out_data);
@@ -331,7 +336,7 @@ operator >>
 	char _arg_re_bt_in_data[]
 )
 /*
-
+C_BT::In()の演算子ver
 */
 {
 	_arg_bt.In(_arg_re_bt_in_data);
@@ -346,7 +351,7 @@ operator >>
 	const char _arg_bt_str_comp[]
 )
 /*
-
+C_BT::In_comp()の演算子ver
 */
 {
 	_arg_bt.In_comp(_arg_bt_str_comp);
@@ -361,7 +366,11 @@ operator ==
 	E_LOGIC _arg_bt_flag_comp
 )
 /*
+if文などで使うための演算子
+Bluetoothと接続しているかどうかの確認用
 
+	TRUE  -> 生存
+	FALES -> 死亡
 */
 {
 	if (_arg_bt._mem_bt_flag == _arg_bt_flag_comp)	return true;
@@ -378,7 +387,11 @@ operator !=
 	E_LOGIC _arg_bt_flag_comp
 )
 /*
+if文などで使うための演算子
+Bluetoothと接続しているかどうかの確認用
 
+	TRUE  -> 生存
+	FALES -> 死亡
 */
 {
 	if (_arg_bt._mem_bt_flag != _arg_bt_flag_comp)	return true;
