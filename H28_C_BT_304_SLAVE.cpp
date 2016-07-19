@@ -182,7 +182,7 @@ Masterからのコントローラデータを受信する。
 	if  (	
 			(strcmp("\r\n+LINK_LOST=000",_in_data) == 0)	|| 
 			(strcmp("\r\n+DISCONNECTED=000",_in_data) == 0)	|| 
-			(_mem_bt_slave_flag_count > 500)
+			(_mem_bt_slave_flag_count > 200)
 		)
 	{		
 		_mem_bt_slave_flag_count = 0;
