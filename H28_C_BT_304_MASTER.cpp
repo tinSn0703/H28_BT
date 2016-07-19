@@ -140,12 +140,12 @@ void
 C_BT_304_MASTER::
 Out
 (
-	const char _arg_bt_master_out_data[]
+	const char _arg_bt_master_out_data[BT_DATA_NUM]
 )
 /*
 コントローラからのデータをSlaveに送信する。
 
-	_arg_bt_master_out_data : 送信するデータ.要素数はBT_DATA_NUM以上で
+	_arg_bt_master_out_data : 送信するデータ.要素数はBT_DATA_NUMで
 */
 {
 	char _out_data[20] = {};
