@@ -55,15 +55,17 @@ public:
 	C_BT()	{}
 	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
 	
-	void Rce_off()	{	CTS_HIGH;	}
+	void Rce_off()
 	/*
 	CTSをHIGHにして、Bluetoothからの送信を禁止する。
 	*/
+	{	CTS_HIGH;	}
 	
-	void Rce_on()	{	CTS_LOW;	}
+	void Rce_on()
 	/*
 	CTSをLOWにして、Bluetoothからの送信を許可する。
 	*/
+	{	CTS_LOW;	}
 	
 	void Out(const char[]);
 	void In(char []);
@@ -142,10 +144,7 @@ C_BT
 
 inline void
 C_BT::
-Out
-(
-	const char _arg_bt_out_data[]
-)
+Out (const char _arg_bt_out_data[])
 /*
 Bluetoothへデータを送信する。
 送信に移れなかったら、タイムアウトする。
@@ -192,10 +191,7 @@ Bluetoothへデータを送信する。
 
 inline void
 C_BT::
-In
-(
-	char _arg_re_bt_in_data[]
-)
+In (char _arg_re_bt_in_data[])
 /*
 Bluetoothからのデータを受信する
 受信に移れなかったら、タイムアウトする。
@@ -253,10 +249,7 @@ Bluetoothからのデータを受信する
 
 void 
 C_BT::
-In_comp
-(
-	const char _arg_bt_str_comp[]
-)
+In_comp (const char _arg_bt_str_comp[])
 /*
 _arg_bt_str_compと一致するまで受信し続ける。
 
@@ -299,8 +292,7 @@ _arg_bt_str_compと一致するまで受信し続け、一致したデータを�
 
 void 
 C_BT::
-Reset
-()
+Reset()
 /*
 Bluetoothを再起動する
 */

@@ -62,10 +62,7 @@ C_BT_304
 
 inline void
 C_BT_304::
-Set_bt_addr
-(
-	const char _arg_bt_addr[]
-)
+Set_bt_addr(const char _arg_bt_addr[])
 /*
 アドレスの設定
 
@@ -82,10 +79,7 @@ Set_bt_addr
 
 inline void 
 C_BT_304::
-Get_bt_addr
-(
-	char _arg_re_bt_addr[]
-)
+Get_bt_addr(char _arg_re_bt_addr[])
 /*
 Bluetoothのアドレスを取得する。
 コネクトした後は使えないのであしからず

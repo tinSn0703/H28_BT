@@ -72,8 +72,7 @@ C_BT_304_SLAVE
 
 void 
 C_BT_304_SLAVE::
-Connect
-()
+Connect()
 /*
 Masterと接続する。
 あらかじめ入力されたアドレスをもとにしてるので入れといてね
@@ -117,10 +116,7 @@ Masterと接続する。
 
 inline void 
 C_BT_304_SLAVE::
-Connect
-(
-	const char _arg_bt_slave_addr[BT_ADDR_BYTE]
-)
+Connect (const char _arg_bt_slave_addr[BT_ADDR_BYTE])
 /*
 アドレスを入力するタイプ。
 入力したアドレスは保持しておくので新たに入れなおす必要性はないよ
@@ -137,8 +133,7 @@ Connect
 
 void 
 C_BT_304_SLAVE::
-Re_Connect
-()
+Re_Connect()
 /*
 再接続。
 */
@@ -154,10 +149,7 @@ Re_Connect
 
 void 
 C_BT_304_SLAVE::
-In
-(
-	char _arg_re_bt_slave_in_data[]
-)
+In (char _arg_re_bt_slave_in_data[])
 /*
 Masterからのコントローラデータを受信する。
 
@@ -224,7 +216,7 @@ operator >>
 )
 /*
 Masterからのデータを受け取る演算子。
-機能的にはC_BT_304_SLVAE::In()まんま
+機能的にはC_BT_304_SLAVE::In()まんま
 	
 	_arg_re_bt_slave_in_data : BT_DATA_NUM以上の要素数にしてね
 */
