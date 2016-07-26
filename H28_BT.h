@@ -1,6 +1,7 @@
 
-#ifndef _H28_BT_H_
-#define _H28_BT_H_ 1
+#pragma once
+
+//#define USED_H28_AM_164 1
 
 #include <H28_AVR/H28_AVR.h>
 #include <string.h>
@@ -37,5 +38,3 @@ _arg_str‚É_arg_str_f‚Ì‚·‚×‚Ä‚ªŠÜ‚Ü‚ê‚Ä‚¢‚ê‚Î‚»‚ê‚Å‚¢‚¢
 #include "H28_C_BT_304.cpp"
 #include "H28_C_BT_304_MASTER.cpp"
 #include "H28_C_BT_304_SLAVE.cpp"
-
-#endif

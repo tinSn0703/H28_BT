@@ -1,6 +1,5 @@
 ﻿
-#ifndef _H28_C_ROBOBA_SLAVE_CPP_
-#define _H28_C_ROBOBA_SLAVE_CPP_ 1
+#pragma once
 
 #include "H28_C_BT_304.cpp"
 
@@ -8,7 +7,7 @@ class C_BT_304_SLAVE : public C_BT_304
 {
 	protected:
 	T_NUM _mem_bt_slave_flag_count;
-	E_LOGIC _mem_bt_slave_falg :1;
+	BOOL _mem_bt_slave_falg :1;
 	
 	public:
 	C_BT_304_SLAVE()	{}
@@ -24,8 +23,8 @@ class C_BT_304_SLAVE : public C_BT_304
 	
 	friend void operator >> (C_BT_304_SLAVE &,char []);
 	
-	friend bool operator == (C_BT_304_SLAVE &,E_LOGIC );
-	friend bool operator != (C_BT_304_SLAVE &,E_LOGIC );
+	friend bool operator == (C_BT_304_SLAVE &,BOOL );
+	friend bool operator != (C_BT_304_SLAVE &,BOOL );
 };
 
 /************************************************************************/
@@ -230,7 +229,7 @@ bool
 operator ==
 (
 	C_BT_304_SLAVE &_arg_bt_slave,
-	E_LOGIC _arg_bt_slave_flag_comp
+	BOOL _arg_bt_slave_flag_comp
 )
 /*
 if文などで使うための演算子
@@ -253,7 +252,7 @@ bool
 operator !=
 (
 	C_BT_304_SLAVE &_arg_bt_slave,
-	E_LOGIC _arg_bt_slave_flag_comp
+	BOOL _arg_bt_slave_flag_comp
 )
 /*
 if文などで使うための演算子
@@ -269,4 +268,3 @@ Masterと接続しているかどうかの確認用
 	
 	return false;
 }
-#endif

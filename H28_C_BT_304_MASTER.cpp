@@ -1,6 +1,5 @@
 ﻿
-#ifndef _H28_C_ROBOBA_MASTER_CPP_
-#define _H28_C_ROBOBA_MASTER_CPP_ 1
+#pragma once
 
 #include "H28_C_BT_304.cpp"
 
@@ -18,8 +17,8 @@ class C_BT_304_MASTER : public C_BT_304
 
 	friend void operator << (C_BT_304_MASTER &, const char []);
 	
-	friend bool operator == (C_BT_304_MASTER &,E_LOGIC );
-	friend bool operator != (C_BT_304_MASTER &,E_LOGIC );
+	friend bool operator == (C_BT_304_MASTER &,BOOL );
+	friend bool operator != (C_BT_304_MASTER &,BOOL );
 };
 
 /************************************************************************/
@@ -206,7 +205,7 @@ bool
 operator == 
 (
 	C_BT_304_MASTER &_arg_bt_master, 
-	E_LOGIC _arg_bt_master_flag_comp
+	BOOL _arg_bt_master_flag_comp
 )
 /*
 if文などで使うための演算子
@@ -227,7 +226,7 @@ bool
 operator != 
 (
 	C_BT_304_MASTER &_arg_bt_master, 
-	E_LOGIC _arg_bt_master_flag_comp
+	BOOL _arg_bt_master_flag_comp
 )
 /*
 if文などで使うための演算子
@@ -241,5 +240,3 @@ Slaveと接続しているかどうかの確認用
 	
 	return false;
 }
-
-#endif

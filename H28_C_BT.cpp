@@ -1,7 +1,6 @@
 ﻿
 
-#ifndef _H28_C_BT_CPP_
-#define _H28_C_BT_CPP_ 1
+#pragma once
 
 #include "H28_BT.h"
 
@@ -20,7 +19,7 @@ private:
 	E_IO_NUM _mem_bt_bit_rts :3;
 	E_IO_NUM _mem_bt_bit_rse :3;
 	
-	E_LOGIC _mem_bt_flag :1;
+	BOOL _mem_bt_flag :1;
 	
 protected:
 
@@ -78,8 +77,8 @@ public:
 	friend void operator >> (C_BT &, char []);
 	friend void operator >> (C_BT &, const char []);
 	
-	friend bool operator == (C_BT &, E_LOGIC );
-	friend bool operator != (C_BT &, E_LOGIC );
+	friend bool operator == (C_BT &, BOOL );
+	friend bool operator != (C_BT &, BOOL );
 };
 
 /************************************************************************/
@@ -112,7 +111,7 @@ C_BT
 {
 	C_TIMER_inside::Set(100);
 	
-	C_UART_base::Set_uart_base_addr(_arg_bt_uart_addr);
+	C_UART_base::_mem_uart_base_addr = _arg_bt_uart_addr;
 	
 	_mem_bt_port_cts = _arg_bt_addr_cts;
 	_mem_bt_port_rts = _arg_bt_addr_rts;
@@ -355,7 +354,7 @@ bool
 operator == 
 (
 	C_BT &_arg_bt, 
-	E_LOGIC _arg_bt_flag_comp
+	BOOL _arg_bt_flag_comp
 )
 /*
 if文などで使うための演算子
@@ -376,7 +375,7 @@ bool
 operator != 
 (
 	C_BT &_arg_bt, 
-	E_LOGIC _arg_bt_flag_comp
+	BOOL _arg_bt_flag_comp
 )
 /*
 if文などで使うための演算子
@@ -390,4 +389,3 @@ Bluetoothと接続しているかどうかの確認用
 	
 	return false;
 }
-#endif

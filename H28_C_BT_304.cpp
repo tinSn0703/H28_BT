@@ -1,6 +1,5 @@
 ﻿
-#ifndef _H28_C_ROBOBA_CPP_
-#define _H28_C_ROBOBA_CPP_ 1
+#pragma once
 
 #include "H28_C_BT.cpp"
 
@@ -102,5 +101,3 @@ Bluetoothのアドレスを取得する。
 	
 	_arg_re_bt_addr[BT_ADDR_BYTE] = '\0';
 }
-
-#endif
