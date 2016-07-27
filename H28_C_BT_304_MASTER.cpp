@@ -3,9 +3,13 @@
 
 #include "H28_C_BT_304.cpp"
 
+/**
+ * BluetoothをMasterで扱うクラス
+ */
 class C_BT_304_MASTER : public C_BT_304
 {
-	public:
+public:
+
 	C_BT_304_MASTER()	{}
 	C_BT_304_MASTER(E_UART_ADDR ,E_IO_PORT_ADDR, E_IO_NUM, E_IO_PORT_ADDR, E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM);
 	
@@ -21,8 +25,17 @@ class C_BT_304_MASTER : public C_BT_304
 	friend bool operator != (C_BT_304_MASTER &,BOOL );
 };
 
-/************************************************************************/
-
+/**
+ * \brief コンストラクタ
+ * 
+ * \param _arg_bt_master_uart_addr : Bluetoothと接続するUARTのレジスタ
+ * \param _arg_bt_master_addr_rts  : RTSピンのレジスタ
+ * \param _arg_bt_master_bit_rts   : RTSピンのビット
+ * \param _arg_bt_master_addr_cts  : CTSピンのレジスタ
+ * \param _arg_bt_master_bit_cts   : CTSピンのビット
+ * \param _arg_bt_master_addr_rse  : RESETピンのレジスタ
+ * \param _arg_bt_master_bit_rse   : RESETピンのビット
+ */
 C_BT_304_MASTER::C_BT_304_MASTER
 (
 	E_UART_ADDR		_arg_bt_master_uart_addr,
@@ -33,18 +46,6 @@ C_BT_304_MASTER::C_BT_304_MASTER
 	E_IO_PORT_ADDR	_arg_bt_master_addr_rse,
 	E_IO_NUM		_arg_bt_master_bit_rse
 )
-/*
-見ての通りコンストラクタ。
-継承の都合上、引数を持たない奴もあるから気を付けてね
-
-	_arg_bt_master_uart_addr : Bluetoothと接続するUARTのレジスタ
-	_arg_bt_master_addr_rts	 : RTSピンのレジスタ
-	_arg_bt_master_bit_rts	 : RTSピンのビット番号
-	_arg_bt_master_addr_cts	 : CTSピンのレジスタ
-	_arg_bt_master_bit_cts	 : CTSピンのビット番号
-	_arg_bt_master_addr_rse	 : RESETピンのレジスタ
-	_arg_bt_master_bit_rse	 : RESETピンのビット番号
-*/
  : C_BT_304
 (
 	_arg_bt_master_uart_addr,
@@ -57,15 +58,12 @@ C_BT_304_MASTER::C_BT_304_MASTER
 )
 {}
 
-/************************************************************************/
-
+/**
+ * \brief Masterと接続する。アドレスはあらかじめ入力されたものを使う
+ */
 void
 C_BT_304_MASTER::
 Connect()
-/*
-Slaveと接続する。
-あらかじめ入力されたアドレスをもとにしてるので入れといてね
-*/
 {
 	char CONMASTER[]  = "AT+CONMASTER=1,000190123456\r\n";
 	char CONNECTED[]  = "\r\n+CONNECTED=000190123456\r\n";
@@ -95,31 +93,26 @@ Slaveと接続する。
 	_mem_bt >> "\r\nOK\r\n";
 }
 
-/************************************************************************/
-
+/**
+ * \brief Masterと接続する。アドレスを入力するタイプ。
+ * 
+ * \param _arg_bt_slave_addr : アドレス。チェック系はないので
+ */
 inline void 
 C_BT_304_MASTER::
 Connect(const char _arg_bt_master_addr[BT_ADDR_BYTE])
-/*
-アドレスを入力するタイプ。
-入力したアドレスは保持しておくので新たに入れなおす必要性はないよ
-	
-	_arg_bt_master_addr : アドレスを入力しといてください。それ以外は入れないでね。
-*/
 {
 	Set_bt_addr(_arg_bt_master_addr);
 	
 	Connect();
 }
 
-/************************************************************************/
-
+/**
+ * \brief 再接続。
+ */
 void 
 C_BT_304_MASTER::
 Re_Connect()
-/*
-再接続
-*/
 {	
 	_mem_bt.Reset();
 	
@@ -128,16 +121,16 @@ Re_Connect()
 	Connect();
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Slaveへ変換してから送る
+ * 具体的には数値を文字列に変換する
+ * 
+ * \param _arg_bt_master_out_data : 送信するデータ
+ */
 void 
 C_BT_304_MASTER::
 Out(const char _arg_bt_master_out_data[BT_DATA_NUM])
-/*
-コントローラからのデータをSlaveに送信する。
-
-	_arg_bt_master_out_data : 送信するデータ.要素数はBT_DATA_NUMで
-*/
 {
 	char _out_data[20] = {};
 	
@@ -181,60 +174,64 @@ Out(const char _arg_bt_master_out_data[BT_DATA_NUM])
 	_mem_bt << _out_data;
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Slaveへデータを送信する。
+ * 機能的にはC_BT_304_MASTER::Out()と同じ
+ * 
+ * \param _arg_bt_master
+ * \param _arg_bt_master_out_data : 送信するデータ
+ */
 void 
 operator << 
 (
 	C_BT_304_MASTER &_arg_bt_master, 
 	const char _arg_bt_master_out_data[]
 )
-/*
-コントローラからのデータをSlaveに送信する演算子。
-ぶっちゃけC_BT_304_MASTER::Out()とやってることは変わりません。
-
-	_arg_bt_master_out_data : 送信するデータ.要素数はBT_DATA_NUM以上で
-*/
 {
 	_arg_bt_master.Out(_arg_bt_master_out_data);
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Slaveと通信しているかを確認する用の演算子
+ * TRUEを表すとき接続。FALESの場合切断。
+ * 
+ * \param _arg_bt_master
+ * \param _arg_bt_master_flag_comp : 比較
+ * 
+ * \return bool 
+ * _arg_bt_masterと_arg_bt_master_flag_compが等しいときtrue
+ */
 bool 
 operator == 
 (
 	C_BT_304_MASTER &_arg_bt_master, 
 	BOOL _arg_bt_master_flag_comp
 )
-/*
-if文などで使うための演算子
-Slaveと接続しているかどうかの確認用
-
-	TRUE  -> 生存
-	FALES -> 死亡
-*/
 {
 	if (_arg_bt_master._mem_bt == _arg_bt_master_flag_comp)	return true;
 	
 	return false;
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Slaveと通信しているかを確認する用の演算子
+ * TRUEを表すとき接続。FALESの場合切断。
+ * 
+ * \param _arg_bt_master
+ * \param _arg_bt_master_flag_comp : 比較
+ * 
+ * \return bool 
+ * _arg_bt_masterと_arg_bt_master_flag_compが等しくないときtrue
+ */
 bool 
 operator != 
 (
 	C_BT_304_MASTER &_arg_bt_master, 
 	BOOL _arg_bt_master_flag_comp
 )
-/*
-if文などで使うための演算子
-Slaveと接続しているかどうかの確認用
-
-	TRUE  -> 生存
-	FALES -> 死亡
-*/
 {
 	if (_arg_bt_master._mem_bt != _arg_bt_master_flag_comp)	return true;
 	

@@ -4,10 +4,10 @@
 
 #include "H28_BT.h"
 
+/**
+ * Bluetoothと送受信を行うためのクラス
+ */
 class C_BT : protected C_UART_base , public C_TIMER_inside
-/*
-Bluetoothと送受信を行うためのクラス
-*/
 {
 private:
 
@@ -54,17 +54,15 @@ public:
 	C_BT()	{}
 	C_BT(E_UART_ADDR ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM ,E_IO_PORT_ADDR ,E_IO_NUM );
 	
-	void Rce_off()
-	/*
-	CTSをHIGHにして、Bluetoothからの送信を禁止する。
-	*/
-	{	CTS_HIGH;	}
+	/**
+	 * \brief CTSをHIGHにして、Bluetoothからの送信を禁止する。
+	 */
+	void Rce_off()	{	CTS_HIGH;	}
 	
-	void Rce_on()
-	/*
-	CTSをLOWにして、Bluetoothからの送信を許可する。
-	*/
-	{	CTS_LOW;	}
+	/**
+	 * \brief CTSをLOWにして、Bluetoothからの送信を許可する。
+	 */
+	void Rce_on()	{	CTS_LOW;	}
 	
 	void Out(const char[]);
 	void In(char []);
@@ -81,9 +79,17 @@ public:
 	friend bool operator != (C_BT &, BOOL );
 };
 
-/************************************************************************/
-
-inline 
+/**
+ * \brief コンストラクタ
+ * 
+ * \param _arg_bt_uart_addr : Bluetoothと接続するUARTのレジスタ
+ * \param _arg_bt_addr_rts  : RTSピンのレジスタ
+ * \param _arg_bt_bit_rts	  : RTSピンのビット
+ * \param _arg_bt_addr_cts  : CTSピンのレジスタ
+ * \param _arg_bt_bit_cts   : CTSピンのビット
+ * \param _arg_bt_addr_rse  : RESETピンのレジスタ
+ * \param _arg_bt_bit_rse   : RESETピンのビット
+ */
 C_BT::
 C_BT
 (	
@@ -95,21 +101,8 @@ C_BT
 	E_IO_PORT_ADDR	_arg_bt_addr_rse,
 	E_IO_NUM		_arg_bt_bit_rse
 )
-/*
-見ての通りコンストラクタ。
-継承の都合上、引数を持たない奴もあるから気を付けてね
-
-	_arg_bt_uart_addr	: Bluetoothと接続するUARTのレジスタ
-	_arg_bt_addr_rts	: RTSピンのレジスタ
-	_arg_bt_bit_rts		: RTSピンのビット番号
-	_arg_bt_addr_cts	: CTSピンのレジスタ
-	_arg_bt_bit_cts		: CTSピンのビット番号
-	_arg_bt_addr_rse	: RESETピンのレジスタ
-	_arg_bt_bit_rse		: RESETピンのビット番号
-	
-*/
 {
-	C_TIMER_inside::Set(100);
+	C_TIMER_inside::Set(100); //10ms
 	
 	C_UART_base::_mem_uart_base_addr = _arg_bt_uart_addr;
 	
@@ -139,17 +132,16 @@ C_BT
 	_mem_bt_flag = FALES;
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Bluetoothへデータを送信する
+ * 送信に移れなかった場合はフラグをFALESにしてタイムアウトする。
+ * 
+ * \param _arg_bt_out_data : 送信するデータ。
+ */
 inline void
 C_BT::
 Out (const char _arg_bt_out_data[])
-/*
-Bluetoothへデータを送信する。
-送信に移れなかったら、タイムアウトする。
-
-	_arg_bt_out_data : 送信するデータ
-*/
 {	
 	for (usint i = 0; _arg_bt_out_data[i] != '\0'; i++)
 	{
@@ -157,13 +149,11 @@ Bluetoothへデータを送信する。
 		
 		while (1)
 		{
-			if ((C_TIMER_inside::Ret_flag() & RTS_CHECK) == TRUE)
+			if ((C_TIMER_inside::Ret_flag() & RTS_CHECK) == TRUE) //通信可能
 			{
 				C_TIMER_inside::End();
 				
 				_mem_bt_flag = TRUE;
-				
-				PORTB &= ~(1 << PB4);
 				
 				goto Go_succe;
 			}
@@ -171,8 +161,6 @@ Bluetoothへデータを送信する。
 			if (C_TIMER_inside::Check())	//カウント完了(タイムアウト)
 			{				
 				_mem_bt_flag = FALES;
-				
-				PORTB |= (1 << PB4);
 				
 				return (void)0;
 			}
@@ -186,17 +174,16 @@ Bluetoothへデータを送信する。
 	}
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Bluetoothからのデータを受け取る
+ * 受信に移れなかったら、タイムアウトする。
+ * 
+ * \param _arg_re_bt_in_data : ここに受信データが格納される
+ */
 inline void
 C_BT::
 In (char _arg_re_bt_in_data[])
-/*
-Bluetoothからのデータを受信する
-受信に移れなかったら、タイムアウトする。
-
-	_arg_re_bt_in_data : ここに受信データが格納される。
-*/
 {	
 	usint i = 0;
 	
@@ -244,16 +231,16 @@ Bluetoothからのデータを受信する
 	}
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * _arg_bt_str_compと一致するまで受信し続ける
+ * ちゃんとしないと無限ループに陥るので注意
+ * 
+ * \param _arg_bt_str_comp : 比較する文字列
+ */
 void 
 C_BT::
 In_comp (const char _arg_bt_str_comp[])
-/*
-_arg_bt_str_compと一致するまで受信し続ける。
-
-	_arg_bt_str_comp : 比較する文字列。
-*/
 {
 	char _in_data[40] = {};
 	
@@ -264,8 +251,14 @@ _arg_bt_str_compと一致するまで受信し続ける。
 	while (strcmp(_arg_bt_str_comp,_in_data) != 0);
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * _arg_bt_str_compと一致するまで受信し続ける
+ * 一致したデータを返す
+ * 
+ * \param _arg_re_bt_in_data : ここに受信データが格納される
+ * \param _arg_bt_str_comp : 比較する文字列
+ */
 void
 C_BT::
 In_comp
@@ -273,12 +266,6 @@ In_comp
 	char _arg_re_bt_in_data[],
 	const char _arg_bt_str_comp[]
 )
-/*
-_arg_bt_str_compと一致するまで受信し続け、一致したデータを返す。
-
-	_arg_re_bt_in_data : ここにデータが格納される
-	_arg_bt_str_comp : 比較する文字列
-*/
 {
 	do
 	{
@@ -287,14 +274,12 @@ _arg_bt_str_compと一致するまで受信し続け、一致したデータを�
 	while (strcmp(_arg_bt_str_comp,_arg_re_bt_in_data) != 0);
 }
 
-/************************************************************************/
-
+/**
+ * \brief Bluetoothを再起動する
+ */
 void 
 C_BT::
-Reset()
-/*
-Bluetoothを再起動する
-*/
+Reset ()
 {	
 	RSE_LOW;
 	_delay_ms(15);
@@ -303,87 +288,100 @@ Bluetoothを再起動する
 	_delay_ms(15);
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Bluetoothにデータを送信する演算子
+ * C_BT::Out()と同じ機能
+ * 
+ * \param _arg_bt
+ * \param _arg_bt_out_data : 送信するデータ
+ */
 void 
 operator << 
 (
 	C_BT &_arg_bt, 
 	const char _arg_bt_out_data[]
 )
-/*
-C_BT::Out()の演算子ver
-*/
 {
 	_arg_bt.Out(_arg_bt_out_data);
 }
 
-/************************************************************************/
-
+/**
+ * \brief
+ * Bluetoothからのデータを受信する演算子。
+ * 右辺が定数の場合、それを受信するまで受信し続ける
+ * C_BT::In()とC_BT::In_comp()と同じ機能
+ * 
+ * \param _arg_bt
+ * \param _arg_re_bt_in_data[] : データが格納される場所
+ */
 void 
 operator >> 
 (
 	C_BT &_arg_bt, 
 	char _arg_re_bt_in_data[]
 )
-/*
-C_BT::In()の演算子ver
-*/
 {
 	_arg_bt.In(_arg_re_bt_in_data);
 }
 
-/************************************************************************/
-
+/**
+ * \brief
+ * Bluetoothからのデータを受信する演算子。
+ * 右辺が定数の場合、それを受信するまで受信し続ける
+ * C_BT::In()とC_BT::In_comp()と同じ機能
+ * 
+ * \param _arg_bt
+ * \param _arg_bt_str_comp : 比較する文字列
+ */
 void 
 operator >> 
 (
 	C_BT &_arg_bt, 
 	const char _arg_bt_str_comp[]
 )
-/*
-C_BT::In_comp()の演算子ver
-*/
 {
 	_arg_bt.In_comp(_arg_bt_str_comp);
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Bluetoothと接続しているのか確認用の演算子。
+ * TRUEを表す場合接続、FALESを表す場合切断
+ * 
+ * \param _arg_bt
+ * \param _arg_bt_flag_comp : 比較
+ * 
+ * \return bool _arg_btと_arg_bt_flag_compが等しいときtrue
+ */
 bool 
 operator == 
 (
 	C_BT &_arg_bt, 
 	BOOL _arg_bt_flag_comp
 )
-/*
-if文などで使うための演算子
-Bluetoothと接続しているかどうかの確認用
-
-	TRUE  -> 生存
-	FALES -> 死亡
-*/
 {
 	if (_arg_bt._mem_bt_flag == _arg_bt_flag_comp)	return true;
 	
 	return false;
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * Bluetoothと接続しているのか確認用の演算子。
+ * TRUEを表す場合接続、FALESを表す場合切断
+ * 
+ * \param _arg_bt
+ * \param _arg_bt_flag_comp : 比較
+ * 
+ * \return bool _arg_btと_arg_bt_flag_compが等しくないときtrue
+ */
 bool 
 operator != 
 (
 	C_BT &_arg_bt, 
 	BOOL _arg_bt_flag_comp
 )
-/*
-if文などで使うための演算子
-Bluetoothと接続しているかどうかの確認用
-
-	TRUE  -> 生存
-	FALES -> 死亡
-*/
 {
 	if (_arg_bt._mem_bt_flag != _arg_bt_flag_comp)	return true;
 	

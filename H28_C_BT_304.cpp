@@ -3,12 +3,17 @@
 
 #include "H28_C_BT.cpp"
 
+/**
+ * Bluetoothを扱うクラス
+ */
 class C_BT_304
 {
-	protected:
+protected:
+	
 	char _mem_bt_addr[BT_ADDR_BYTE];
 	
-	public:
+public:
+
 	C_BT _mem_bt;
 	
 	C_BT_304()	{}
@@ -18,8 +23,17 @@ class C_BT_304
 	void Get_bt_addr(char []);
 };
 
-/************************************************************************/
-
+/**
+ * \brief コンストラクタ
+ * 
+ * \param _arg_bt_uart_addr : Bluetoothと接続するUARTのレジスタ
+ * \param _arg_bt_addr_rts  : RTSピンのレジスタ
+ * \param _arg_bt_bit_rts	  : RTSピンのビット
+ * \param _arg_bt_addr_cts  : CTSピンのレジスタ
+ * \param _arg_bt_bit_cts   : CTSピンのビット
+ * \param _arg_bt_addr_rse  : RESETピンのレジスタ
+ * \param _arg_bt_bit_rse   : RESETピンのビット
+ */
 C_BT_304::
 C_BT_304
 (
@@ -31,18 +45,6 @@ C_BT_304
 	E_IO_PORT_ADDR	_arg_bt_addr_rse,
 	E_IO_NUM		_arg_bt_bit_rse
 )
-/*
-見ての通りコンストラクタ。
-継承の都合上、引数を持たない奴もあるから気を付けてね
-
-	_arg_bt_uart_addr	: Bluetoothと接続するUARTのレジスタ
-	_arg_bt_addr_rts	: RTSピンのレジスタ
-	_arg_bt_bit_rts		: RTSピンのビット番号
-	_arg_bt_addr_cts	: CTSピンのレジスタ
-	_arg_bt_bit_cts		: CTSピンのビット番号
-	_arg_bt_addr_rse	: RESETピンのレジスタ
-	_arg_bt_bit_rse		: RESETピンのビット番号
-*/
  : _mem_bt
 (
 	_arg_bt_uart_addr,
@@ -57,16 +59,14 @@ C_BT_304
 	_mem_bt >> "\r\nOK\r\n";
 }
 
-/************************************************************************/
-
+/**
+ * \brief Bluetoothのアドレスの設定
+ * 
+ * \param _arg_bt_addr : ここにアドレスを入力する
+ */
 inline void
 C_BT_304::
 Set_bt_addr(const char _arg_bt_addr[])
-/*
-アドレスの設定
-
-	_arg_bt_addr : アドレスを入力してね
-*/
 {
 	for (usint i = 0; i < BT_ADDR_BYTE; i++)
 	{
@@ -74,17 +74,16 @@ Set_bt_addr(const char _arg_bt_addr[])
 	}
 }
 
-/************************************************************************/
-
+/**
+ * \brief 
+ * 接続されているBluetoothのアドレスを取得する
+ * Master-Slaveで接続した後は使えません
+ * 
+ * \param _arg_re_bt_addr : 取得したアドレスがここに格納される
+ */
 inline void 
 C_BT_304::
 Get_bt_addr(char _arg_re_bt_addr[])
-/*
-Bluetoothのアドレスを取得する。
-コネクトした後は使えないのであしからず
-
-	_arg_re_bt_addr : ここにアドレスが入ります
-*/
 {
 	_mem_bt << "AT+GETADDR\r\n";
 	

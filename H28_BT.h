@@ -9,19 +9,24 @@
 #define BT_DATA_NUM 4
 #define BT_ADDR_BYTE 12
 
+/**
+ * \brief 
+ * _arg_str_f‚Æ_arg_str‚ğ”äŠr‚·‚é 
+ * _arg_str‚É_arg_str_f‚Ì‚·‚×‚Ä‚ªŠÜ‚Ü‚ê‚Ä‚¢‚ê‚Î‚»‚ê‚Å‚¢‚¢
+ *
+ * \param _arg_str_f : ”äŠr‚·‚é•¶š—ñ
+ * \param _arg_str : ”äŠr‚³‚ê‚é•¶š—ñ
+ * 
+ * \return usint
+ *		0 -> ˆê’v
+ *		1 -> •sˆê’v
+ */
 inline usint 
 strcmp
 (
 	const char *_arg_str_f, 
 	char *_arg_str
 )
-/*
-_arg_str_f‚Æ_arg_str‚ğ”äŠr‚·‚éB
-_arg_str‚É_arg_str_f‚Ì‚·‚×‚Ä‚ªŠÜ‚Ü‚ê‚Ä‚¢‚ê‚Î‚»‚ê‚Å‚¢‚¢
-
-	_arg_str_f : ”äŠr‚·‚é•¶š—ñ
-	_arg_str : ”äŠr‚³‚ê‚é•¶š—ñ
-*/
 {
 	for (usint i = 0; _arg_str_f[i] != '\0'; i++)
 	{
