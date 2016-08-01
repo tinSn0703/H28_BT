@@ -7,7 +7,7 @@
 /**
  * Bluetoothと送受信を行うためのクラス
  */
-class C_BT : protected C_UART_base , public C_TIMER_inside
+class C_BT : protected C_UART_base
 {
 private:
 
@@ -20,6 +20,8 @@ private:
 	E_IO_NUM _mem_bt_bit_rse :3;
 	
 	BOOL _mem_bt_flag :1;
+	
+	C_TIMER_inside _mem_uart_timer;
 	
 protected:
 
@@ -101,9 +103,8 @@ C_BT
 	E_IO_PORT_ADDR	_arg_bt_addr_rse,
 	E_IO_NUM		_arg_bt_bit_rse
 )
-{
-	C_TIMER_inside::Set(100); //10ms
-	
+: _mem_uart_timer(100) //10ms
+{	
 	C_UART_base::_mem_uart_base_addr = _arg_bt_uart_addr;
 	
 	_mem_bt_port_cts = _arg_bt_addr_cts;
@@ -145,20 +146,20 @@ Out (const char _arg_bt_out_data[])
 {	
 	for (usint i = 0; _arg_bt_out_data[i] != '\0'; i++)
 	{
-		C_TIMER_inside::Start();
+		_mem_uart_timer.Start();
 		
 		while (1)
 		{
-			if ((C_TIMER_inside::Ret_flag() & RTS_CHECK) == TRUE) //通信可能
+			if ((_mem_uart_timer.Ret_flag() & RTS_CHECK) == TRUE) //通信可能
 			{
-				C_TIMER_inside::End();
+				_mem_uart_timer.End();
 				
 				_mem_bt_flag = TRUE;
 				
 				goto Go_succe;
 			}
 			
-			if (C_TIMER_inside::Check())	//カウント完了(タイムアウト)
+			if (_mem_uart_timer.Check())	//カウント完了(タイムアウト)
 			{				
 				_mem_bt_flag = FALES;
 				
@@ -191,20 +192,20 @@ In (char _arg_re_bt_in_data[])
 	{
 		CTS_LOW;
 		
-		C_TIMER_inside::Start();
+		_mem_uart_timer.Start();
 		
 		while (1)
 		{
-			if ((C_TIMER_inside::Ret_flag() & CHECK_BIT_TF(UCSRA,RXC)) == TRUE)	//通信可能
+			if ((_mem_uart_timer.Ret_flag() & CHECK_BIT_TF(UCSRA,RXC)) == TRUE)	//通信可能
 			{
-				C_TIMER_inside::End();
+				_mem_uart_timer.End();
 				
 				_mem_bt_flag = TRUE;
 				
 				goto GO_succe;
 			}
 			
-			if (C_TIMER_inside::Check())	//カウント完了(タイムアウト)
+			if (_mem_uart_timer.Check())	//カウント完了(タイムアウト)
 			{				
 				CTS_HIGH;
 				
