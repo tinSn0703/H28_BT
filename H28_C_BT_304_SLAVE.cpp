@@ -26,7 +26,7 @@ C_BT_304_SLAVE
 )
 {
 	_mem_bt_slave_flag_count = 0;
-	_mem_bt_slave_falg = FALES;
+	_mem_bt_slave_falg = FALSE;
 }
 
 void 
@@ -93,7 +93,7 @@ In (char _arg_re_data_in[])
 {
 	char _in_data[30] = {};
 
-	_mem_bt_slave_falg = FALES;
+	_mem_bt_slave_falg = FALSE;
 
 	_mem_bt >> _in_data;
 	

@@ -46,7 +46,7 @@ C_BT
 	__PORT_CTS__ |= (1 << _arg_bit_cts);
 	__PORT_RSE__ |= (1 << _mem_bt_bit_rse);
 	
-	_mem_bt_flag = FALES;
+	_mem_bt_flag = FALSE;
 }
 
 inline void
@@ -70,7 +70,7 @@ Out (const char _arg_out_data[])
 			
 			if (_mem_uart_timer.Check())	//カウント完了(タイムアウト)
 			{				
-				_mem_bt_flag = FALES;
+				_mem_bt_flag = FALSE;
 				
 				return (void)0;
 			}
@@ -111,7 +111,7 @@ In (char _arg_re_in_data[])
 			{				
 				__CTS_HIGH__;
 				
-				_mem_bt_flag = FALES;
+				_mem_bt_flag = FALSE;
 				
 				return (void)0;
 			}
