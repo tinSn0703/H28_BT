@@ -39,14 +39,40 @@ C_BT
 	__UCSRB__ = ((1<<RXEN) | (1<<TXEN));
 	__UCSRC__ = ((1<<UCSZ0) | (1<<UCSZ1));
 
-	__DDR_CTS__ |=  (1 << _arg_bit_cts);
-	__DDR_RSE__ |=  (1 << _mem_bt_bit_rse);
-	__DDR_RTS__ &= ~(1 << _arg_bit_rts);
+	__C_BT_DDR_CTS__ |=  (1 << _arg_bit_cts);
+	__C_BT_DDR_RSE__ |=  (1 << _mem_bt_bit_rse);
+	__C_BT_DDR_RTS__ &= ~(1 << _arg_bit_rts);
 	
-	__PORT_CTS__ |= (1 << _arg_bit_cts);
-	__PORT_RSE__ |= (1 << _mem_bt_bit_rse);
+	__C_BT_PORT_CTS__ |= (1 << _arg_bit_cts);
+	__C_BT_PORT_RSE__ |= (1 << _mem_bt_bit_rse);
 	
 	_mem_bt_flag = FALSE;
+}
+
+inline void 
+C_BT :: 
+Set_isr(BOOL _arg_nf_isr)
+{
+	switch (_arg_nf_isr)
+	{
+		case TRUE:	__UCSRB__ |=  (1 << RXCIE);	break; //On
+		case FALSE:	__UCSRB__ &= ~(1 << RXCIE);	break; //Off
+	}
+}
+
+inline void 
+C_BT :: 
+Set_isr_on ()
+{
+	__UCSRB__ |=  (1 << RXCIE);
+}
+
+
+inline void
+C_BT ::
+Set_isr_off ()
+{
+	__UCSRB__ &= ~(1 << RXCIE);
 }
 
 inline void
@@ -59,7 +85,7 @@ Out (const char _arg_out_data[])
 		
 		while (1)
 		{
-			if ((_mem_uart_timer.Ret_flag() & __RTS_CHECK__) == TRUE) //通信可能
+			if ((_mem_uart_timer.Ret_flag() & __C_BT_RTS_CHECK__) == TRUE) //通信可能
 			{
 				_mem_uart_timer.End();
 				
@@ -92,7 +118,7 @@ In (char _arg_re_in_data[])
 	
 	while (1)
 	{
-		__CTS_LOW__;
+		__C_BT_CTS_LOW__;
 		
 		_mem_uart_timer.Start();
 		
@@ -109,7 +135,7 @@ In (char _arg_re_in_data[])
 			
 			if (_mem_uart_timer.Check())	//カウント完了(タイムアウト)
 			{				
-				__CTS_HIGH__;
+				__C_BT_CTS_HIGH__;
 				
 				_mem_bt_flag = FALSE;
 				
@@ -119,18 +145,21 @@ In (char _arg_re_in_data[])
 		
 		GO_succe:
 		
-		_arg_re_in_data[i] = __UDR__;
-		
-		__CTS_HIGH__;
-		
-		if ((_arg_re_in_data[i] == '\n') && (i > 1))
+		if ((__UCSRA__ & ((1 << FE) | (1 << DOR) | (1 << UPE))) == 0x00)
 		{
-			_arg_re_in_data[i + 1] = '\0';
+			_arg_re_in_data[i] = __UDR__;
 			
-			break;
+			__C_BT_CTS_HIGH__;
+			
+			if ((_arg_re_in_data[i] == '\n') && (i > 1))
+			{
+				_arg_re_in_data[i + 1] = '\0';
+				
+				break;
+			}
+			
+			i++;
 		}
-		
-		i++;
 	}
 }
 
@@ -166,10 +195,10 @@ void
 C_BT::
 Reset ()
 {	
-	__RSE_LOW__;
+	__C_BT_RSE_LOW__;
 	_delay_ms(15);
 
-	__RSE_HIGH__;
+	__C_BT_RSE_HIGH__;
 	_delay_ms(15);
 }
 

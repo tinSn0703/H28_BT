@@ -32,25 +32,25 @@ protected:
 	E_IO_NUM RTS()	{	return _mem_bt_bit_rts;	}
 	E_IO_NUM RSE()	{	return _mem_bt_bit_rse;	}
 	
-#	define __PIN_RTS__  _SFR_IO8(ADDR_RTS() + 0)
-#	define __PIN_CTS__  _SFR_IO8(ADDR_CTS() + 0)
-#	define __PIN_RSE__  _SFR_IO8(ADDR_RSE() + 0)
+#	define __C_BT_PIN_RTS__	_SFR_IO8(ADDR_RTS() + 0)
+#	define __C_BT_PIN_CTS__	_SFR_IO8(ADDR_CTS() + 0)
+#	define __C_BT_PIN_RSE__	_SFR_IO8(ADDR_RSE() + 0)
 	
-#	define __DDR_RTS__	_SFR_IO8(ADDR_RTS() + 1)
-#	define __DDR_CTS__  _SFR_IO8(ADDR_CTS() + 1)
-#	define __DDR_RSE__  _SFR_IO8(ADDR_RSE() + 1)
+#	define __C_BT_DDR_RTS__	_SFR_IO8(ADDR_RTS() + 1)
+#	define __C_BT_DDR_CTS__	_SFR_IO8(ADDR_CTS() + 1)
+#	define __C_BT_DDR_RSE__	_SFR_IO8(ADDR_RSE() + 1)
 	
-#	define __PORT_RTS__ _SFR_IO8(ADDR_RTS() + 2)
-#	define __PORT_CTS__ _SFR_IO8(ADDR_CTS() + 2)
-#	define __PORT_RSE__ _SFR_IO8(ADDR_RSE() + 2)
+#	define __C_BT_PORT_RTS__ _SFR_IO8(ADDR_RTS() + 2)
+#	define __C_BT_PORT_CTS__ _SFR_IO8(ADDR_CTS() + 2)
+#	define __C_BT_PORT_RSE__ _SFR_IO8(ADDR_RSE() + 2)
 	
-#	define __RTS_CHECK__ (CHECK_TURN_BIT_TF(__PIN_RTS__,RTS()))
+#	define __C_BT_RTS_CHECK__ (CHECK_TURN_BIT_TF(__C_BT_PIN_RTS__, RTS()))
 	
-#	define __CTS_HIGH__	(__PORT_CTS__ |=  (1 << CTS()))
-#	define __CTS_LOW__	(__PORT_CTS__ &= ~(1 << CTS()))
+#	define __C_BT_CTS_HIGH__	(__C_BT_PORT_CTS__ |=  (1 << CTS()))
+#	define __C_BT_CTS_LOW__		(__C_BT_PORT_CTS__ &= ~(1 << CTS()))
 	
-#	define __RSE_HIGH__	(__PORT_RSE__ |=  (1 << RSE()))
-#	define __RSE_LOW__	(__PORT_RSE__ &= ~(1 << RSE()))
+#	define __C_BT_RSE_HIGH__	(__C_BT_PORT_RSE__ |=  (1 << RSE()))
+#	define __C_BT_RSE_LOW__		(__C_BT_PORT_RSE__ &= ~(1 << RSE()))
 	
 public:
 	
@@ -80,12 +80,29 @@ public:
 	/**
 	 * \brief CTSをHIGHにして、Bluetoothからの送信を禁止する。
 	 */
-	void Rce_off()	{	__CTS_HIGH__;	}
+	void Rce_off()	{	__C_BT_CTS_HIGH__;	}
 	
 	/**
 	 * \brief CTSをLOWにして、Bluetoothからの送信を許可する。
 	 */
-	void Rce_on()	{	__CTS_LOW__;	}
+	void Rce_on()	{	__C_BT_CTS_LOW__;	}
+	
+	/**
+	 * \brief 受信完了割り込みの設定を行う
+	 * 
+	 * \param _arg_nf_isr : ONOFF
+	 */
+	void Set_isr(BOOL _arg_nf_isr);
+	
+	/**
+	 * \brief 受信完了割り込みをONにする
+	 */
+	void Set_isr_on();
+	
+	/**
+	 * \brief 受信完了割り込みをOFFにする
+	 */
+	void Set_isr_off();
 	
 	/**
 	 * \brief 
