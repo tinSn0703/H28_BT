@@ -10,47 +10,9 @@ class C_BT : protected C_UART_base
 {
 private:
 	
-	E_IO_PORT_ADDR _mem_bt_io_addr_cts :8;
-	E_IO_PORT_ADDR _mem_bt_io_addr_rts :8;
-	E_IO_PORT_ADDR _mem_bt_io_addr_rse :8;
-	
-	E_IO_NUM _mem_bt_bit_cts :3;
-	E_IO_NUM _mem_bt_bit_rts :3;
-	E_IO_NUM _mem_bt_bit_rse :3;
-	
 	BOOL _mem_bt_flag :1;
 	
-	C_TIMER_inside _mem_uart_timer;
-	
-protected:
-	
-	E_IO_PORT_ADDR ADDR_CTS()	{	return _mem_bt_io_addr_cts;	}
-	E_IO_PORT_ADDR ADDR_RTS()	{	return _mem_bt_io_addr_rts;	}
-	E_IO_PORT_ADDR ADDR_RSE()	{	return _mem_bt_io_addr_rse;	}
-	
-	E_IO_NUM CTS()	{	return _mem_bt_bit_cts;	}
-	E_IO_NUM RTS()	{	return _mem_bt_bit_rts;	}
-	E_IO_NUM RSE()	{	return _mem_bt_bit_rse;	}
-	
-#	define __C_BT_PIN_RTS__	_SFR_IO8(ADDR_RTS() + 0)
-#	define __C_BT_PIN_CTS__	_SFR_IO8(ADDR_CTS() + 0)
-#	define __C_BT_PIN_RSE__	_SFR_IO8(ADDR_RSE() + 0)
-	
-#	define __C_BT_DDR_RTS__	_SFR_IO8(ADDR_RTS() + 1)
-#	define __C_BT_DDR_CTS__	_SFR_IO8(ADDR_CTS() + 1)
-#	define __C_BT_DDR_RSE__	_SFR_IO8(ADDR_RSE() + 1)
-	
-#	define __C_BT_PORT_RTS__ _SFR_IO8(ADDR_RTS() + 2)
-#	define __C_BT_PORT_CTS__ _SFR_IO8(ADDR_CTS() + 2)
-#	define __C_BT_PORT_RSE__ _SFR_IO8(ADDR_RSE() + 2)
-	
-#	define __C_BT_RTS_CHECK__ (CHECK_TURN_BIT_TF(__C_BT_PIN_RTS__, RTS()))
-	
-#	define __C_BT_CTS_HIGH__	(__C_BT_PORT_CTS__ |=  (1 << CTS()))
-#	define __C_BT_CTS_LOW__		(__C_BT_PORT_CTS__ &= ~(1 << CTS()))
-	
-#	define __C_BT_RSE_HIGH__	(__C_BT_PORT_RSE__ |=  (1 << RSE()))
-#	define __C_BT_RSE_LOW__		(__C_BT_PORT_RSE__ &= ~(1 << RSE()))
+//	C_TIMER_inside _mem_uart_timer;
 	
 public:
 	
@@ -62,30 +24,24 @@ public:
 	
 	/**
 	 * \brief 
-	 * コンストラクタ。使用するUARTとピンの設定を行う
+	 * コンストラクタ。使用するUARTの設定を行う
 	 * 115.2 [kbps]
 	 * 倍速許可
 	 * パリティ禁止
 	 * 
 	 * \param _arg_uart_addr	: Bluetoothと接続するUARTのレジスタ
-	 * \param _arg_io_addr_rts  : RTSピンのレジスタ
-	 * \param _arg_bit_rts		: RTSピンのビット
-	 * \param _arg_io_addr_cts  : CTSピンのレジスタ
-	 * \param _arg_bit_cts		: CTSピンのビット
-	 * \param _arg_io_addr_rse	: RESETピンのレジスタ
-	 * \param _arg_bit_rse		: RESETピンのビット
 	 */
-	C_BT(E_UART_ADDR _arg_uart_addr,E_IO_PORT_ADDR _arg_io_addr_rts,E_IO_NUM _arg_bit_rts,E_IO_PORT_ADDR _arg_io_addr_cts,E_IO_NUM _arg_bit_cts,E_IO_PORT_ADDR _arg_io_addr_rse,E_IO_NUM _arg_bit_rse);
+	C_BT (E_UART_ADDR _arg_uart_addr);
 	
 	/**
 	 * \brief CTSをHIGHにして、Bluetoothからの送信を禁止する。
 	 */
-	void Rce_off()	{	__C_BT_CTS_HIGH__;	}
+	void Rce_off()	{	__CTS_HIGH__;	}
 	
 	/**
 	 * \brief CTSをLOWにして、Bluetoothからの送信を許可する。
 	 */
-	void Rce_on()	{	__C_BT_CTS_LOW__;	}
+	void Rce_on()	{	__CTS_LOW___;	}
 	
 	/**
 	 * \brief 受信完了割り込みの設定を行う
@@ -104,14 +60,18 @@ public:
 	 */
 	void Set_isr_off();
 	
+	void Out(const char _arg_out_data[]);
+	
+	void In(char _arg_re_in_data[]);
+	
 	/**
 	 * \brief 
 	 * Bluetoothへデータを送信する
-	 * 送信に移れなかった場合はフラグをFALESにしてタイムアウトする。
+	 * 送信に移れなかった場合はフラグをFALSEにしてタイムアウトする。
 	 * 
 	 * \param _arg_out_data : 送信するデータ。
 	 */
-	void Out(const char _arg_out_data[]);
+//	BOOL Out_check(const char _arg_out_data[]);
 	
 	/**
 	 * \brief 
@@ -120,7 +80,7 @@ public:
 	 * 
 	 * \param _arg_re_in_data : ここに受信データが格納される
 	 */
-	void In(char _arg_in_data[]);
+//	BOOL In_check(char _arg_in_data[]);
 	
 	/**
 	 * \brief 
@@ -176,7 +136,7 @@ public:
 	 * \param _arg_bt
 	 * \param _arg_str_comp : 比較する文字列
 	 */
-	friend void operator >> (C_BT &_arg_bt, const char _arg_str_comp[]);
+	friend void operator >= (C_BT &_arg_bt, const char _arg_str_comp[]);
 	
 	/**
 	 * \brief 
